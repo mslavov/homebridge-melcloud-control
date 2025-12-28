@@ -4,17 +4,17 @@
   "version": "1.0.0",
   "description": "Homebridge plugin to control Mitsubishi Air Conditioner with external temperature sensor support (Shelly). Fork of homebridge-melcloud-control by grzegorz914.",
   "license": "MIT",
-  "author": "milkoslavov",
+  "author": "mslavov",
   "contributors": [
     "grzegorz914 (original author)"
   ],
-  "homepage": "https://github.com/milkoslavov/homebridge-melcloud-control#readme",
+  "homepage": "https://github.com/mslavov/homebridge-melcloud-control#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/milkoslavov/homebridge-melcloud-control.git"
+    "url": "git+https://github.com/mslavov/homebridge-melcloud-control.git"
   },
   "bugs": {
-    "url": "https://github.com/milkoslavov/homebridge-melcloud-control/issues"
+    "url": "https://github.com/mslavov/homebridge-melcloud-control/issues"
   },
   "type": "module",
   "exports": {
