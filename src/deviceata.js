@@ -62,6 +62,8 @@ class DeviceAta extends EventEmitter {
         this.externalTemperature = null;
         this.externalHumidity = null;
         this.temperatureOffset = 0;
+        this.userTargetTemperature = null; //user's intended target (before compensation)
+        this.lastCompensatedTarget = null; //last compensated value sent to AC
         this.shellyClient = null;
         this.shellyPollingInterval = null;
 
@@ -340,7 +342,7 @@ class DeviceAta extends EventEmitter {
     }
 
     //update temperature offset based on AC internal and external sensor readings
-    updateTemperatureOffset() {
+    async updateTemperatureOffset() {
         if (!this.externalSensorEnabled || this.externalTemperature === null) {
             this.temperatureOffset = 0;
             return;
@@ -353,15 +355,49 @@ class DeviceAta extends EventEmitter {
 
         //calculate offset: positive means AC reads higher than external
         const newOffset = acRoomTemp - this.externalTemperature;
+        const offsetChanged = Math.abs(newOffset - this.temperatureOffset) > 0.3;
 
-        //only log if offset changed significantly
-        if (Math.abs(newOffset - this.temperatureOffset) > 0.3) {
-            this.temperatureOffset = newOffset;
+        //update offset
+        this.temperatureOffset = newOffset;
+
+        //log if offset changed significantly
+        if (offsetChanged && this.logInfo) {
+            this.emit('info', `Temperature offset: ${this.temperatureOffset.toFixed(1)}°C (AC: ${acRoomTemp}°C, External: ${this.externalTemperature}°C)`);
+        }
+
+        //reapply compensation if offset changed and we have a user target
+        if (offsetChanged && this.compensationEnabled && this.userTargetTemperature !== null) {
+            await this.reapplyCompensation();
+        }
+    }
+
+    //reapply compensation when offset changes
+    async reapplyCompensation() {
+        if (!this.compensationEnabled || !this.externalSensorEnabled || this.userTargetTemperature === null) {
+            return;
+        }
+
+        const newCompensated = this.getCompensatedTargetTemperature(this.userTargetTemperature);
+
+        //only send if compensated value changed
+        if (this.lastCompensatedTarget !== null && Math.abs(newCompensated - this.lastCompensatedTarget) < 0.5) {
+            return;
+        }
+
+        try {
+            const deviceData = this.deviceData;
+            if (!deviceData?.Device) return;
+
+            this.lastCompensatedTarget = newCompensated;
+            deviceData.Device.SetTemperature = newCompensated;
+
             if (this.logInfo) {
-                this.emit('info', `Temperature offset: ${this.temperatureOffset.toFixed(1)}°C (AC: ${acRoomTemp}°C, External: ${this.externalTemperature}°C)`);
+                this.emit('info', `Reapplying compensation: user wants ${this.userTargetTemperature}°C → AC set to ${newCompensated}°C`);
             }
-        } else {
-            this.temperatureOffset = newOffset;
+
+            await this.melCloudAta.send(this.accountType, this.displayType, deviceData, AirConditioner.EffectiveFlags.SetTemperature);
+        } catch (error) {
+            if (this.logWarn) this.emit('warn', `Reapply compensation error: ${error}`);
         }
     }
 
@@ -565,8 +601,10 @@ class DeviceAta extends EventEmitter {
                         })
                         .onSet(async (value) => {
                             try {
+                                this.userTargetTemperature = value; //store user's intended target
                                 const tempKey = this.accessory.operationMode === 8 ? 'DefaultCoolingSetTemperature' : 'SetTemperature';
                                 const compensatedValue = this.getCompensatedTargetTemperature(value);
+                                this.lastCompensatedTarget = compensatedValue;
                                 deviceData.Device[tempKey] = compensatedValue < 16 ? 16 : compensatedValue;
                                 if (this.logInfo) this.emit('info', `Set cooling threshold temperature: ${value}${this.accessory.temperatureUnit}`);
                                 await this.melCloudAta.send(this.accountType, this.displayType, deviceData, AirConditioner.EffectiveFlags.SetTemperature);
@@ -587,8 +625,10 @@ class DeviceAta extends EventEmitter {
                             })
                             .onSet(async (value) => {
                                 try {
+                                    this.userTargetTemperature = value; //store user's intended target
                                     const tempKey = this.accessory.operationMode === 8 ? 'DefaultHeatingSetTemperature' : 'SetTemperature';
                                     const compensatedValue = this.getCompensatedTargetTemperature(value);
+                                    this.lastCompensatedTarget = compensatedValue;
                                     deviceData.Device[tempKey] = compensatedValue;
                                     if (this.logInfo) this.emit('info', `Set heating threshold temperature: ${value}${this.accessory.temperatureUnit}`);
                                     await this.melCloudAta.send(this.accountType, this.displayType, deviceData, AirConditioner.EffectiveFlags.SetTemperature);
@@ -708,7 +748,9 @@ class DeviceAta extends EventEmitter {
                                     value = 16;
                                 }
 
+                                this.userTargetTemperature = value; //store user's intended target
                                 const compensatedValue = this.getCompensatedTargetTemperature(value);
+                                this.lastCompensatedTarget = compensatedValue;
                                 deviceData.Device.SetTemperature = compensatedValue;
                                 if (this.logInfo) this.emit('info', `Set temperature: ${value}${this.accessory.temperatureUnit}`);
                                 await this.melCloudAta.send(this.accountType, this.displayType, deviceData, AirConditioner.EffectiveFlags.SetTemperature);
@@ -1664,6 +1706,11 @@ class DeviceAta extends EventEmitter {
                         this.temperatureOffset = acRoomTemperature - this.externalTemperature;
                     }
                     const setTemperature = deviceData.Device.SetTemperature;
+                    //initialize user target from current AC setting if not set
+                    if (this.externalSensorEnabled && this.userTargetTemperature === null && setTemperature !== null) {
+                        this.userTargetTemperature = setTemperature;
+                        if (this.logDebug) this.emit('debug', `Initialized user target temperature: ${setTemperature}°C`);
+                    }
                     const defaultHeatingSetTemperature = deviceData.Device.DefaultHeatingSetTemperature;
                     const defaultCoolingSetTemperature = deviceData.Device.DefaultCoolingSetTemperature;
                     const actualFanSpeed = deviceData.Device.ActualFanSpeed;
