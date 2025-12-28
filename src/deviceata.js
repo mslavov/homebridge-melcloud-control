@@ -2145,7 +2145,7 @@ class DeviceAta extends EventEmitter {
                 });
 
             //start external integrations
-            if (this.restFul.enable || this.mqtt.enable) await this.externalIntegrations();
+            if (this.restFul.enable || this.mqtt.enable || this.externalSensorEnabled) await this.externalIntegrations();
 
             //check state
             await this.melCloudAta.checkState(this.melcloudDevicesList);
