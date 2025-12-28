@@ -1870,10 +1870,10 @@ class DeviceAta extends EventEmitter {
                                 { type: Characteristic.CurrentTemperature, value: roomTemperature },
                                 { type: Characteristic.LockPhysicalControls, value: obj.lockPhysicalControl },
                                 { type: Characteristic.TemperatureDisplayUnits, value: obj.useFahrenheit },
-                                { type: Characteristic.CoolingThresholdTemperature, value: operationMode === 8 ? defaultCoolingSetTemperature : setTemperature }
+                                { type: Characteristic.CoolingThresholdTemperature, value: operationMode === 8 ? defaultCoolingSetTemperature : (this.externalSensorEnabled && this.userTargetTemperature !== null ? this.userTargetTemperature : setTemperature) }
                             );
 
-                            if (supportsHeat) characteristics.push({ type: Characteristic.HeatingThresholdTemperature, value: operationMode === 8 ? defaultHeatingSetTemperature : setTemperature });
+                            if (supportsHeat) characteristics.push({ type: Characteristic.HeatingThresholdTemperature, value: operationMode === 8 ? defaultHeatingSetTemperature : (this.externalSensorEnabled && this.userTargetTemperature !== null ? this.userTargetTemperature : setTemperature) });
                             if (supportsFanSpeed) characteristics.push({ type: Characteristic.RotationSpeed, value: obj.currentFanSpeed });
                             if (supportsSwingFunction) characteristics.push({ type: Characteristic.SwingMode, value: obj.currentSwingMode });
                             break;
@@ -1938,7 +1938,7 @@ class DeviceAta extends EventEmitter {
                                 { type: Characteristic.CurrentHeatingCoolingState, value: obj.currentOperationMode },
                                 { type: Characteristic.TargetHeatingCoolingState, value: obj.targetOperationMode },
                                 { type: Characteristic.CurrentTemperature, value: roomTemperature },
-                                { type: Characteristic.TargetTemperature, value: setTemperature },
+                                { type: Characteristic.TargetTemperature, value: this.externalSensorEnabled && this.userTargetTemperature !== null ? this.userTargetTemperature : setTemperature },
                                 { type: Characteristic.TemperatureDisplayUnits, value: obj.useFahrenheit }
                             );
                             break;

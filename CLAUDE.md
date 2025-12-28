@@ -20,6 +20,24 @@ homebridge -D -P /path/to/homebridge-melcloud-control
 npm publish
 ```
 
+## Releasing New Versions
+
+When bumping versions, update both files:
+
+1. **`package.json`** - Update the `version` field
+2. **`CHANGELOG.md`** - Add a new entry at the top (after the warnings section) following this format:
+
+```markdown
+# [X.Y.Z] - (DD.MM.YYYY)
+
+## Changes
+
+- Description of changes
+- Additional changes
+```
+
+Use the existing changelog entries as reference for formatting and style.
+
 ## Architecture
 
 ### Entry Point
