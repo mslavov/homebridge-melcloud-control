@@ -381,6 +381,89 @@
                       }
                     ]
                   },
+                  "externalSensor": {
+                    "title": "External Temperature Sensor",
+                    "type": "object",
+                    "properties": {
+                      "enabled": {
+                        "title": "Enable External Sensor",
+                        "type": "boolean",
+                        "default": false,
+                        "description": "Enable external temperature sensor for more accurate room temperature readings."
+                      },
+                      "type": {
+                        "title": "Sensor Type",
+                        "type": "string",
+                        "default": "shelly",
+                        "description": "Type of external sensor.",
+                        "oneOf": [
+                          {
+                            "title": "Shelly Cloud",
+                            "enum": ["shelly"]
+                          }
+                        ],
+                        "condition": {
+                          "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].externalSensor?.enabled === true;"
+                        }
+                      },
+                      "shellyServerUri": {
+                        "title": "Shelly Server URI",
+                        "type": "string",
+                        "placeholder": "shelly-58-eu.shelly.cloud",
+                        "description": "Shelly Cloud server URI (found in Shelly App -> User Settings).",
+                        "condition": {
+                          "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].externalSensor?.enabled === true && model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].externalSensor?.type === 'shelly';"
+                        }
+                      },
+                      "shellyAuthKey": {
+                        "title": "Shelly Auth Key",
+                        "type": "string",
+                        "description": "Shelly Cloud API authentication key.",
+                        "condition": {
+                          "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].externalSensor?.enabled === true && model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].externalSensor?.type === 'shelly';"
+                        }
+                      },
+                      "shellyDeviceId": {
+                        "title": "Shelly Device ID",
+                        "type": "string",
+                        "description": "Shelly device ID (found in Device -> Settings -> Device Information).",
+                        "condition": {
+                          "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].externalSensor?.enabled === true && model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].externalSensor?.type === 'shelly';"
+                        }
+                      },
+                      "compensationEnabled": {
+                        "title": "Enable Temperature Compensation",
+                        "type": "boolean",
+                        "default": true,
+                        "description": "Automatically adjust target temperature to compensate for sensor offset.",
+                        "condition": {
+                          "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].externalSensor?.enabled === true;"
+                        }
+                      },
+                      "hysteresis": {
+                        "title": "Hysteresis (°C)",
+                        "type": "number",
+                        "default": 0.5,
+                        "minimum": 0,
+                        "maximum": 3,
+                        "description": "Minimum temperature offset before compensation is applied.",
+                        "condition": {
+                          "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].externalSensor?.enabled === true && model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].externalSensor?.compensationEnabled === true;"
+                        }
+                      },
+                      "pollInterval": {
+                        "title": "Poll Interval (seconds)",
+                        "type": "integer",
+                        "default": 60,
+                        "minimum": 30,
+                        "maximum": 300,
+                        "description": "How often to poll the external sensor.",
+                        "condition": {
+                          "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].externalSensor?.enabled === true;"
+                        }
+                      }
+                    }
+                  },
                   "temperatureSensor": {
                     "title": "Room",
                     "type": "boolean",

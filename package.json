@@ -1,20 +1,20 @@
 {
-  "displayName": "MELCloud Control",
-  "name": "homebridge-melcloud-control",
-  "version": "4.5.8",
-  "description": "Homebridge plugin to control Mitsubishi Air Conditioner, Heat Pump and Energy Recovery Ventilation.",
+  "displayName": "MELCloud External Sensor",
+  "name": "homebridge-melcloud-external-sensor",
+  "version": "1.0.0",
+  "description": "Homebridge plugin to control Mitsubishi Air Conditioner with external temperature sensor support (Shelly). Fork of homebridge-melcloud-control by grzegorz914.",
   "license": "MIT",
-  "author": "grzegorz914",
-  "maintainers": [
-    "grzegorz914"
+  "author": "milkoslavov",
+  "contributors": [
+    "grzegorz914 (original author)"
   ],
-  "homepage": "https://github.com/grzegorz914/homebridge-melcloud-control#readme",
+  "homepage": "https://github.com/milkoslavov/homebridge-melcloud-control#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/grzegorz914/homebridge-melcloud-control.git"
+    "url": "git+https://github.com/milkoslavov/homebridge-melcloud-control.git"
   },
   "bugs": {
-    "url": "https://github.com/grzegorz914/homebridge-melcloud-control/issues"
+    "url": "https://github.com/milkoslavov/homebridge-melcloud-control/issues"
   },
   "type": "module",
   "exports": {
@@ -48,15 +48,10 @@
     "homekit",
     "mitsubishi",
     "melcloud",
-    "melcloudhome",
-    "ecodan",
-    "zubadan",
-    "lossnay",
-    "vrf",
-    "mqtt",
-    "restful"
+    "shelly",
+    "external-sensor",
+    "temperature-compensation"
   ],
-  "contributors": [],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   }
