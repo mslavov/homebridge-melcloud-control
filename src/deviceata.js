@@ -596,6 +596,10 @@ class DeviceAta extends EventEmitter {
                             minStep: this.accessory.temperatureStep
                         })
                         .onGet(async () => {
+                            //return user's intended target if compensation is active
+                            if (this.externalSensorEnabled && this.userTargetTemperature !== null) {
+                                return this.userTargetTemperature;
+                            }
                             const value = this.accessory.operationMode === 8 ? this.accessory.defaultCoolingSetTemperature : this.accessory.setTemperature;
                             return value;
                         })
@@ -620,6 +624,10 @@ class DeviceAta extends EventEmitter {
                                 minStep: this.accessory.temperatureStep
                             })
                             .onGet(async () => {
+                                //return user's intended target if compensation is active
+                                if (this.externalSensorEnabled && this.userTargetTemperature !== null) {
+                                    return this.userTargetTemperature;
+                                }
                                 const value = this.accessory.operationMode === 8 ? this.accessory.defaultHeatingSetTemperature : this.accessory.setTemperature;
                                 return value;
                             })
@@ -737,6 +745,10 @@ class DeviceAta extends EventEmitter {
                             minStep: this.accessory.temperatureStep
                         })
                         .onGet(async () => {
+                            //return user's intended target if compensation is active
+                            if (this.externalSensorEnabled && this.userTargetTemperature !== null) {
+                                return this.userTargetTemperature;
+                            }
                             const value = this.accessory.setTemperature;
                             return value;
                         })
