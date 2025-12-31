@@ -1,7 +1,7 @@
 import { join } from 'path';
 import { mkdirSync } from 'fs';
 import MelCloud from './src/melcloud.js';
-import DeviceAta from './src/deviceata.js';
+import DeviceAta from './src/deviceata/index.js';
 import ImpulseGenerator from './src/impulsegenerator.js';
 import { PluginName, PlatformName, DeviceType } from './src/constants.js';
 
@@ -122,20 +122,13 @@ class MelCloudPlatform {
 										continue;
 									}
 
-									//presets
-									const presetIds = (deviceInMelCloud.Presets ?? []).map(p => String(p.ID));
-									const presets = (device.presets || []).filter(p => (p.displayType ?? 0) > 0 && p.id !== '0' && presetIds.includes(p.id));
-
-									//buttons
-									const buttons = (device.buttonsSensors || []).filter(b => (b.displayType ?? 0) > 0);
-
 									//only ATA devices supported
 									if (deviceType !== 0) {
 										if (logLevel.warn) log.warn(`${name}, ${deviceTypeString}, ${deviceName}, only ATA devices are supported.`);
 										continue;
 									}
 
-									const configuredDevice = new DeviceAta(api, account, device, presets, [], [], buttons, defaultTempsFile, accountInfo, accountFile, melcloud, melcloudDevicesList);
+									const configuredDevice = new DeviceAta(api, account, device, defaultTempsFile, accountInfo, accountFile, melcloud, melcloudDevicesList);
 
 									configuredDevice.on('devInfo', (info) => logLevel.devInfo && log.info(info))
 										.on('success', (msg) => log.success(`${name}, ${deviceTypeString}, ${deviceName}, ${msg}`))

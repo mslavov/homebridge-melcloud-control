@@ -22,6 +22,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Do not use Homebridge UI > v5.5.0 because of break config.json
 
+# [1.1.0] - (31.12.2025)
+
+## Changes
+
+- Major simplification: removed all unused services
+- Kept only HeaterCooler service and external Shelly sensor with temperature compensation
+- Removed: Thermostat mode, temperature sensors, status sensors, frost/overheat protection, holiday mode, presets, schedules, scenes, buttons
+- Simplified config.schema.json (reduced from ~1400 lines to ~400 lines)
+- Significantly reduced codebase complexity for easier maintenance
+
 # [4.5.7] - (24.12.2025)
 
 ## Changes

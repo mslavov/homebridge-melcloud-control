@@ -45,162 +45,32 @@
               "default": "0",
               "description": "Here select the account language.",
               "anyOf": [
-                {
-                  "title": "English",
-                  "enum": [
-                    "0"
-                  ]
-                },
-                {
-                  "title": "Български",
-                  "enum": [
-                    "1"
-                  ]
-                },
-                {
-                  "title": "Čeština",
-                  "enum": [
-                    "2"
-                  ]
-                },
-                {
-                  "title": "Dansk",
-                  "enum": [
-                    "3"
-                  ]
-                },
-                {
-                  "title": "Deutsch",
-                  "enum": [
-                    "4"
-                  ]
-                },
-                {
-                  "title": "Eesti",
-                  "enum": [
-                    "5"
-                  ]
-                },
-                {
-                  "title": "Español",
-                  "enum": [
-                    "6"
-                  ]
-                },
-                {
-                  "title": "Français",
-                  "enum": [
-                    "7"
-                  ]
-                },
-                {
-                  "title": "Հայերեն",
-                  "enum": [
-                    "8"
-                  ]
-                },
-                {
-                  "title": "Latviešu",
-                  "enum": [
-                    "9"
-                  ]
-                },
-                {
-                  "title": "Lietuvių",
-                  "enum": [
-                    "10"
-                  ]
-                },
-                {
-                  "title": "Magyar",
-                  "enum": [
-                    "11"
-                  ]
-                },
-                {
-                  "title": "Nederlands",
-                  "enum": [
-                    "12"
-                  ]
-                },
-                {
-                  "title": "Norwegian",
-                  "enum": [
-                    "13"
-                  ]
-                },
-                {
-                  "title": "Polski",
-                  "enum": [
-                    "14"
-                  ]
-                },
-                {
-                  "title": "Português",
-                  "enum": [
-                    "15"
-                  ]
-                },
-                {
-                  "title": "Русский",
-                  "enum": [
-                    "16"
-                  ]
-                },
-                {
-                  "title": "Suomi",
-                  "enum": [
-                    "17"
-                  ]
-                },
-                {
-                  "title": "Svenska",
-                  "enum": [
-                    "18"
-                  ]
-                },
-                {
-                  "title": "Italiano",
-                  "enum": [
-                    "19"
-                  ]
-                },
-                {
-                  "title": "Українська",
-                  "enum": [
-                    "20"
-                  ]
-                },
-                {
-                  "title": "Türkçe",
-                  "enum": [
-                    "21"
-                  ]
-                },
-                {
-                  "title": "Ελληνικά",
-                  "enum": [
-                    "22"
-                  ]
-                },
-                {
-                  "title": "Hrvatski",
-                  "enum": [
-                    "23"
-                  ]
-                },
-                {
-                  "title": "Română",
-                  "enum": [
-                    "24"
-                  ]
-                },
-                {
-                  "title": "Slovenščina",
-                  "enum": [
-                    "25"
-                  ]
-                }
+                { "title": "English", "enum": ["0"] },
+                { "title": "Български", "enum": ["1"] },
+                { "title": "Čeština", "enum": ["2"] },
+                { "title": "Dansk", "enum": ["3"] },
+                { "title": "Deutsch", "enum": ["4"] },
+                { "title": "Eesti", "enum": ["5"] },
+                { "title": "Español", "enum": ["6"] },
+                { "title": "Français", "enum": ["7"] },
+                { "title": "Հdelays", "enum": ["8"] },
+                { "title": "Latviešu", "enum": ["9"] },
+                { "title": "Lietuvių", "enum": ["10"] },
+                { "title": "Magyar", "enum": ["11"] },
+                { "title": "Nederlands", "enum": ["12"] },
+                { "title": "Norwegian", "enum": ["13"] },
+                { "title": "Polski", "enum": ["14"] },
+                { "title": "Português", "enum": ["15"] },
+                { "title": "Русский", "enum": ["16"] },
+                { "title": "Suomi", "enum": ["17"] },
+                { "title": "Svenska", "enum": ["18"] },
+                { "title": "Italiano", "enum": ["19"] },
+                { "title": "Українська", "enum": ["20"] },
+                { "title": "Türkçe", "enum": ["21"] },
+                { "title": "Ελληνικά", "enum": ["22"] },
+                { "title": "Hrvatski", "enum": ["23"] },
+                { "title": "Română", "enum": ["24"] },
+                { "title": "Slovenščina", "enum": ["25"] }
               ]
             },
             "type": {
@@ -209,18 +79,8 @@
               "default": "disabled",
               "description": "Here select the account type.",
               "anyOf": [
-                {
-                  "title": "None / Disabled",
-                  "enum": [
-                    "disabled"
-                  ]
-                },
-                {
-                  "title": "MELCLoud",
-                  "enum": [
-                    "melcloud"
-                  ]
-                }
+                { "title": "None / Disabled", "enum": ["disabled"] },
+                { "title": "MELCLoud", "enum": ["melcloud"] }
               ]
             },
             "ataDevices": {
@@ -243,28 +103,12 @@
                     "title": "Display Type",
                     "type": "integer",
                     "minimum": 0,
-                    "maximum": 2,
+                    "maximum": 1,
                     "default": 0,
                     "description": "Select accessory control type displayed in HomeKit.",
                     "anyOf": [
-                      {
-                        "title": "None / Disabled",
-                        "enum": [
-                          0
-                        ]
-                      },
-                      {
-                        "title": "Heater / Cooler",
-                        "enum": [
-                          1
-                        ]
-                      },
-                      {
-                        "title": "Thermostat",
-                        "enum": [
-                          2
-                        ]
-                      }
+                      { "title": "None / Disabled", "enum": [0] },
+                      { "title": "Heater / Cooler", "enum": [1] }
                     ]
                   },
                   "name": {
@@ -281,30 +125,10 @@
                     "default": 1,
                     "description": "Select the operating mode for Heat, work only if mode supported by device.",
                     "anyOf": [
-                      {
-                        "title": "None / Disabled",
-                        "enum": [
-                          0
-                        ]
-                      },
-                      {
-                        "title": "Heat",
-                        "enum": [
-                          1
-                        ]
-                      },
-                      {
-                        "title": "Dry",
-                        "enum": [
-                          2
-                        ]
-                      },
-                      {
-                        "title": "Fan",
-                        "enum": [
-                          3
-                        ]
-                      }
+                      { "title": "None / Disabled", "enum": [0] },
+                      { "title": "Heat", "enum": [1] },
+                      { "title": "Dry", "enum": [2] },
+                      { "title": "Fan", "enum": [3] }
                     ]
                   },
                   "coolDryFanMode": {
@@ -315,30 +139,10 @@
                     "default": 1,
                     "description": "Select the operating mode for Cool, work only if mode supported by device.",
                     "anyOf": [
-                      {
-                        "title": "None / Disabled",
-                        "enum": [
-                          0
-                        ]
-                      },
-                      {
-                        "title": "Cool",
-                        "enum": [
-                          1
-                        ]
-                      },
-                      {
-                        "title": "Dry",
-                        "enum": [
-                          2
-                        ]
-                      },
-                      {
-                        "title": "Fan",
-                        "enum": [
-                          3
-                        ]
-                      }
+                      { "title": "None / Disabled", "enum": [0] },
+                      { "title": "Cool", "enum": [1] },
+                      { "title": "Dry", "enum": [2] },
+                      { "title": "Fan", "enum": [3] }
                     ]
                   },
                   "autoDryFanMode": {
@@ -349,30 +153,10 @@
                     "default": 1,
                     "description": "Select the operating mode for Auto, work only if mode supported by device.",
                     "anyOf": [
-                      {
-                        "title": "None / Disabled",
-                        "enum": [
-                          0
-                        ]
-                      },
-                      {
-                        "title": "Auto",
-                        "enum": [
-                          1
-                        ]
-                      },
-                      {
-                        "title": "Dry",
-                        "enum": [
-                          2
-                        ]
-                      },
-                      {
-                        "title": "Fan",
-                        "enum": [
-                          3
-                        ]
-                      }
+                      { "title": "None / Disabled", "enum": [0] },
+                      { "title": "Auto", "enum": [1] },
+                      { "title": "Dry", "enum": [2] },
+                      { "title": "Fan", "enum": [3] }
                     ]
                   },
                   "externalSensor": {
@@ -391,12 +175,7 @@
                         "default": "shelly",
                         "description": "Type of external sensor.",
                         "oneOf": [
-                          {
-                            "title": "Shelly Cloud",
-                            "enum": [
-                              "shelly"
-                            ]
-                          }
+                          { "title": "Shelly Cloud", "enum": ["shelly"] }
                         ],
                         "condition": {
                           "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].externalSensor?.enabled === true;"
@@ -458,652 +237,6 @@
                           "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].externalSensor?.enabled === true;"
                         }
                       }
-                    }
-                  },
-                  "temperatureSensor": {
-                    "title": "Room",
-                    "type": "boolean",
-                    "default": false,
-                    "description": "This enable extra room temperature sensor and use in HomeKit automations."
-                  },
-                  "temperatureOutdoorSensor": {
-                    "title": "Outdoor",
-                    "type": "boolean",
-                    "default": false,
-                    "description": "This enable extra outdoor temperature sensor and use in HomeKit automations."
-                  },
-                  "inStandbySensor": {
-                    "title": "In Standby",
-                    "type": "boolean",
-                    "default": false,
-                    "description": "This enable in standby mode sensor and use in HomeKit automations."
-                  },
-                  "connectSensor": {
-                    "title": "Connect",
-                    "type": "boolean",
-                    "default": false,
-                    "description": "This enable connect state sensor and use in HomeKit automations."
-                  },
-                  "errorSensor": {
-                    "title": "Error",
-                    "type": "boolean",
-                    "default": false,
-                    "description": "This enable error sensor and use in HomeKit automations."
-                  },
-                  "frostProtectionSupport": {
-                    "title": "Frost Protection Support",
-                    "type": "boolean",
-                    "default": false,
-                    "description": "This enable frost protection control and sensors and use in HomeKit automations.",
-                    "condition": {
-                      "functionBody": "return false;"
-                    }
-                  },
-                  "overheatProtectionSupport": {
-                    "title": "Overheat Protection Support",
-                    "type": "boolean",
-                    "default": false,
-                    "description": "This enable overheat protection control and sensors and use in HomeKit automations.",
-                    "condition": {
-                      "functionBody": "return false;"
-                    }
-                  },
-                  "holidayModeSupport": {
-                    "title": "Holiday Mode Support",
-                    "type": "boolean",
-                    "default": false,
-                    "description": "This enable holiday mode control and sensors and use in HomeKit automations.",
-                    "condition": {
-                      "functionBody": "return false;"
-                    }
-                  },
-                  "presets": {
-                    "title": "Presets",
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "title": "Id",
-                          "type": "string",
-                          "default": "0"
-                        },
-                        "displayType": {
-                          "title": "Display Type",
-                          "type": "integer",
-                          "minimum": 0,
-                          "maximum": 7,
-                          "default": 0,
-                          "description": "Select the characteristic type to be displayed in HomeKit.",
-                          "anyOf": [
-                            {
-                              "title": "None / Disabled",
-                              "enum": [
-                                0
-                              ]
-                            },
-                            {
-                              "title": "Motion Sensor",
-                              "enum": [
-                                1
-                              ]
-                            },
-                            {
-                              "title": "Occupancy Sensor",
-                              "enum": [
-                                2
-                              ]
-                            },
-                            {
-                              "title": "Contact Sensor",
-                              "enum": [
-                                3
-                              ]
-                            },
-                            {
-                              "title": "Switch + Motion Sensor",
-                              "enum": [
-                                4
-                              ]
-                            },
-                            {
-                              "title": "Switch + Occupancy Sensor",
-                              "enum": [
-                                5
-                              ]
-                            },
-                            {
-                              "title": "Switch + Contact Sensor",
-                              "enum": [
-                                6
-                              ]
-                            },
-                            {
-                              "title": "Switch",
-                              "enum": [
-                                7
-                              ]
-                            }
-                          ]
-                        },
-                        "name": {
-                          "title": "Name",
-                          "type": "string",
-                          "placeholder": "Preset",
-                          "description": "Here set Your own name displayed in HomeKit.",
-                          "condition": {
-                            "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].presets[arrayIndices[2]].displayType > 0;"
-                          }
-                        },
-                        "namePrefix": {
-                          "title": "Prefix",
-                          "type": "boolean",
-                          "default": false,
-                          "description": "Enable the accessory name as a prefix for preset name.",
-                          "condition": {
-                            "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].presets[arrayIndices[2]].displayType > 0;"
-                          }
-                        }
-                      },
-                      "required": [
-                        "displayType"
-                      ]
-                    }
-                  },
-                  "schedules": {
-                    "title": "Schedules",
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "title": "Id",
-                          "type": "string",
-                          "default": "0"
-                        },
-                        "displayType": {
-                          "title": "Display Type",
-                          "type": "integer",
-                          "minimum": 0,
-                          "maximum": 7,
-                          "default": 0,
-                          "description": "Select the characteristic type to be displayed in HomeKit.",
-                          "anyOf": [
-                            {
-                              "title": "None / Disabled",
-                              "enum": [
-                                0
-                              ]
-                            },
-                            {
-                              "title": "Motion Sensor",
-                              "enum": [
-                                1
-                              ]
-                            },
-                            {
-                              "title": "Occupancy Sensor",
-                              "enum": [
-                                2
-                              ]
-                            },
-                            {
-                              "title": "Contact Sensor",
-                              "enum": [
-                                3
-                              ]
-                            },
-                            {
-                              "title": "Switch + Motion Sensor",
-                              "enum": [
-                                4
-                              ]
-                            },
-                            {
-                              "title": "Switch + Occupancy Sensor",
-                              "enum": [
-                                5
-                              ]
-                            },
-                            {
-                              "title": "Switch + Contact Sensor",
-                              "enum": [
-                                6
-                              ]
-                            },
-                            {
-                              "title": "Switch",
-                              "enum": [
-                                7
-                              ]
-                            }
-                          ]
-                        },
-                        "name": {
-                          "title": "Name",
-                          "type": "string",
-                          "placeholder": "Schedule",
-                          "description": "Here set Your own name displayed in HomeKit.",
-                          "condition": {
-                            "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].schedules[arrayIndices[2]].displayType > 0;"
-                          }
-                        },
-                        "namePrefix": {
-                          "title": "Prefix",
-                          "type": "boolean",
-                          "default": false,
-                          "description": "Enable the accessory name as a prefix for schedule name.",
-                          "condition": {
-                            "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].schedules[arrayIndices[2]].displayType > 0;"
-                          }
-                        }
-                      },
-                      "required": [
-                        "displayType"
-                      ]
-                    }
-                  },
-                  "scenes": {
-                    "title": "Scenes",
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "title": "Id",
-                          "type": "string",
-                          "default": "0"
-                        },
-                        "displayType": {
-                          "title": "Display Type",
-                          "type": "integer",
-                          "minimum": 0,
-                          "maximum": 7,
-                          "default": 0,
-                          "description": "Select the characteristic type to be displayed in HomeKit.",
-                          "anyOf": [
-                            {
-                              "title": "None / Disabled",
-                              "enum": [
-                                0
-                              ]
-                            },
-                            {
-                              "title": "Motion Sensor",
-                              "enum": [
-                                1
-                              ]
-                            },
-                            {
-                              "title": "Occupancy Sensor",
-                              "enum": [
-                                2
-                              ]
-                            },
-                            {
-                              "title": "Contact Sensor",
-                              "enum": [
-                                3
-                              ]
-                            },
-                            {
-                              "title": "Switch + Motion Sensor",
-                              "enum": [
-                                4
-                              ]
-                            },
-                            {
-                              "title": "Switch + Occupancy Sensor",
-                              "enum": [
-                                5
-                              ]
-                            },
-                            {
-                              "title": "Switch + Contact Sensor",
-                              "enum": [
-                                6
-                              ]
-                            },
-                            {
-                              "title": "Switch",
-                              "enum": [
-                                7
-                              ]
-                            }
-                          ]
-                        },
-                        "name": {
-                          "title": "Name",
-                          "type": "string",
-                          "placeholder": "Scene",
-                          "description": "Here set Your own name displayed in HomeKit.",
-                          "condition": {
-                            "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].scenes[arrayIndices[2]].displayType > 0;"
-                          }
-                        },
-                        "namePrefix": {
-                          "title": "Prefix",
-                          "type": "boolean",
-                          "default": false,
-                          "description": "Enable the accessory name as a prefix for scene name.",
-                          "condition": {
-                            "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].scenes[arrayIndices[2]].displayType > 0;"
-                          }
-                        }
-                      },
-                      "required": [
-                        "displayType"
-                      ]
-                    }
-                  },
-                  "buttonsSensors": {
-                    "title": "Button / Sensor",
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "properties": {
-                        "displayType": {
-                          "title": "Display Type",
-                          "type": "integer",
-                          "minimum": 0,
-                          "maximum": 7,
-                          "default": 0,
-                          "description": "Select the characteristic type to be displayed in HomeKit.",
-                          "anyOf": [
-                            {
-                              "title": "None / Disabled",
-                              "enum": [
-                                0
-                              ]
-                            },
-                            {
-                              "title": "Motion Sensor",
-                              "enum": [
-                                1
-                              ]
-                            },
-                            {
-                              "title": "Occupancy Sensor",
-                              "enum": [
-                                2
-                              ]
-                            },
-                            {
-                              "title": "Contact Sensor",
-                              "enum": [
-                                3
-                              ]
-                            },
-                            {
-                              "title": "Switch + Motion Sensor",
-                              "enum": [
-                                4
-                              ]
-                            },
-                            {
-                              "title": "Switch + Occupancy Sensor",
-                              "enum": [
-                                5
-                              ]
-                            },
-                            {
-                              "title": "Switch + Contact Sensor",
-                              "enum": [
-                                6
-                              ]
-                            },
-                            {
-                              "title": "Switch",
-                              "enum": [
-                                7
-                              ]
-                            }
-                          ]
-                        },
-                        "mode": {
-                          "title": "Mode",
-                          "type": "integer",
-                          "minimum": 0,
-                          "maximum": 40,
-                          "description": "Function, VH - Vane Horizontal, VV - Vane Vertical.",
-                          "anyOf": [
-                            {
-                              "title": "POWER ON / OFF",
-                              "enum": [
-                                0
-                              ]
-                            },
-                            {
-                              "title": "MODE HEAT",
-                              "enum": [
-                                1
-                              ]
-                            },
-                            {
-                              "title": "MODE DRY",
-                              "enum": [
-                                2
-                              ]
-                            },
-                            {
-                              "title": "MODE COOL",
-                              "enum": [
-                                3
-                              ]
-                            },
-                            {
-                              "title": "MODE FAN",
-                              "enum": [
-                                4
-                              ]
-                            },
-                            {
-                              "title": "MODE AUTO",
-                              "enum": [
-                                5
-                              ]
-                            },
-                            {
-                              "title": "MODE PURIFY",
-                              "enum": [
-                                6
-                              ]
-                            },
-                            {
-                              "title": "MODE DRY CONTROL HIDE",
-                              "enum": [
-                                7
-                              ]
-                            },
-                            {
-                              "title": "VH MODE AUTO",
-                              "enum": [
-                                10
-                              ]
-                            },
-                            {
-                              "title": "VH MODE 1 / LEFT",
-                              "enum": [
-                                11
-                              ]
-                            },
-                            {
-                              "title": "VH MODE 2",
-                              "enum": [
-                                12
-                              ]
-                            },
-                            {
-                              "title": "VH MODE 3 / CENTER",
-                              "enum": [
-                                13
-                              ]
-                            },
-                            {
-                              "title": "VH MODE 4",
-                              "enum": [
-                                14
-                              ]
-                            },
-                            {
-                              "title": "VH MODE 5 / RIGHT",
-                              "enum": [
-                                15
-                              ]
-                            },
-                            {
-                              "title": "VH MODE SPLIT",
-                              "enum": [
-                                16
-                              ]
-                            },
-                            {
-                              "title": "VH MODE SWING",
-                              "enum": [
-                                17
-                              ]
-                            },
-                            {
-                              "title": "VV MODE AUTO",
-                              "enum": [
-                                20
-                              ]
-                            },
-                            {
-                              "title": "VV MODE 1 / UP",
-                              "enum": [
-                                21
-                              ]
-                            },
-                            {
-                              "title": "VV MODE 2",
-                              "enum": [
-                                22
-                              ]
-                            },
-                            {
-                              "title": "VV MODE 3 / CENTER",
-                              "enum": [
-                                23
-                              ]
-                            },
-                            {
-                              "title": "VV MODE 4",
-                              "enum": [
-                                24
-                              ]
-                            },
-                            {
-                              "title": "VV MODE 5 / DOWN",
-                              "enum": [
-                                25
-                              ]
-                            },
-                            {
-                              "title": "VV SWING",
-                              "enum": [
-                                26
-                              ]
-                            },
-                            {
-                              "title": "VH / VV CONTROLS HIDE",
-                              "enum": [
-                                27
-                              ]
-                            },
-                            {
-                              "title": "FAN MODE AUTO",
-                              "enum": [
-                                30
-                              ]
-                            },
-                            {
-                              "title": "FAN MODE 1",
-                              "enum": [
-                                31
-                              ]
-                            },
-                            {
-                              "title": "FAN MODE 2",
-                              "enum": [
-                                32
-                              ]
-                            },
-                            {
-                              "title": "FAN MODE 3",
-                              "enum": [
-                                33
-                              ]
-                            },
-                            {
-                              "title": "FAN MODE 4",
-                              "enum": [
-                                34
-                              ]
-                            },
-                            {
-                              "title": "FAN MODE 5",
-                              "enum": [
-                                35
-                              ]
-                            },
-                            {
-                              "title": "FAN MODE 6",
-                              "enum": [
-                                36
-                              ]
-                            },
-                            {
-                              "title": "LOCK CONTROL All",
-                              "enum": [
-                                37
-                              ]
-                            },
-                            {
-                              "title": "LOCK CONTROL POWER",
-                              "enum": [
-                                38
-                              ]
-                            },
-                            {
-                              "title": "LOCK CONTROL MODE",
-                              "enum": [
-                                39
-                              ]
-                            },
-                            {
-                              "title": "LOCK CONTROL TEMPERATURE",
-                              "enum": [
-                                40
-                              ]
-                            }
-                          ],
-                          "condition": {
-                            "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].buttonsSensors[arrayIndices[2]].displayType > 0;"
-                          }
-                        },
-                        "name": {
-                          "title": "Name",
-                          "type": "string",
-                          "placeholder": "Button name",
-                          "description": "Here set Your own name displayed in HomeKit.",
-                          "condition": {
-                            "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].buttonsSensors[arrayIndices[2]].displayType > 0;"
-                          }
-                        },
-                        "namePrefix": {
-                          "title": "Prefix",
-                          "type": "boolean",
-                          "default": false,
-                          "description": "Enable the accessory name as a prefix for button / sensor name.",
-                          "condition": {
-                            "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].buttonsSensors[arrayIndices[2]].displayType > 0;"
-                          }
-                        }
-                      },
-                      "required": [
-                        "displayType"
-                      ]
                     }
                   }
                 },
@@ -1190,193 +323,54 @@
         "accounts[].language",
         "accounts[].type",
         {
-          "key": "accounts[]",
+          "key": "accounts[].ataDevices",
           "type": "tabarray",
-          "title": "{{ value.title }}",
+          "title": "{{ value.name }}",
           "items": [
             {
-              "title": "Air Conditioner",
+              "key": "accounts[].ataDevices[].id",
+              "readonly": true
+            },
+            "accounts[].ataDevices[].displayType",
+            {
+              "title": "Settings",
+              "type": "section",
+              "description": "Device settings",
+              "expandable": true,
+              "expanded": false,
               "items": [
-                {
-                  "key": "accounts[].ataDevices",
-                  "type": "tabarray",
-                  "title": "{{ value.name }}",
-                  "items": [
-                    {
-                      "key": "accounts[].ataDevices[]",
-                      "items": [
-                        {
-                          "key": "accounts[].ataDevices[].id",
-                          "readonly": true
-                        },
-                        "accounts[].ataDevices[].displayType",
-                        {
-                          "title": "Settings",
-                          "type": "section",
-                          "description": "Section for setup device settings",
-                          "expandable": true,
-                          "expanded": false,
-                          "items": [
-                            "accounts[].ataDevices[].name",
-                            "accounts[].ataDevices[].heatDryFanMode",
-                            "accounts[].ataDevices[].coolDryFanMode",
-                            "accounts[].ataDevices[].autoDryFanMode",
-                            "accounts[].ataDevices[].frostProtectionSupport",
-                            "accounts[].ataDevices[].overheatProtectionSupport",
-                            "accounts[].ataDevices[].holidayModeSupport"
-                          ],
-                          "condition": {
-                            "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].displayType > 0;"
-                          }
-                        },
-                        {
-                          "title": "Presets",
-                          "type": "section",
-                          "description": "Section for setup device presets",
-                          "expandable": true,
-                          "expanded": false,
-                          "items": [
-                            {
-                              "key": "accounts[].ataDevices[].presets",
-                              "type": "tabarray",
-                              "title": "{{ value.name }}",
-                              "items": [
-                                {
-                                  "key": "accounts[].ataDevices[].presets[].id",
-                                  "readonly": true
-                                },
-                                "accounts[].ataDevices[].presets[].displayType",
-                                "accounts[].ataDevices[].presets[].name",
-                                "accounts[].ataDevices[].presets[].namePrefix"
-                              ]
-                            }
-                          ],
-                          "condition": {
-                            "functionBody": "return model.accounts[arrayIndices[0]].type === 'melcloud' && model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].displayType > 0;"
-                          }
-                        },
-                        {
-                          "title": "Scenes",
-                          "type": "section",
-                          "description": "Section for setup device scenes",
-                          "expandable": true,
-                          "expanded": false,
-                          "items": [
-                            {
-                              "key": "accounts[].ataDevices[].scenes",
-                              "type": "tabarray",
-                              "title": "{{ value.name }}",
-                              "items": [
-                                {
-                                  "key": "accounts[].ataDevices[].scenes[].id",
-                                  "readonly": true
-                                },
-                                "accounts[].ataDevices[].scenes[].displayType",
-                                "accounts[].ataDevices[].scenes[].name",
-                                "accounts[].ataDevices[].scenes[].namePrefix"
-                              ]
-                            }
-                          ],
-                          "condition": {
-                            "functionBody": "return false && model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].displayType > 0;"
-                          }
-                        },
-                        {
-                          "title": "Schedules",
-                          "type": "section",
-                          "description": "Section for setup device schedules",
-                          "expandable": true,
-                          "expanded": false,
-                          "items": [
-                            {
-                              "key": "accounts[].ataDevices[].schedules",
-                              "type": "tabarray",
-                              "title": "{{ value.name }}",
-                              "items": [
-                                {
-                                  "key": "accounts[].ataDevices[].schedules[].id",
-                                  "readonly": true
-                                },
-                                "accounts[].ataDevices[].schedules[].displayType",
-                                "accounts[].ataDevices[].schedules[].name",
-                                "accounts[].ataDevices[].schedules[].namePrefix"
-                              ]
-                            }
-                          ],
-                          "condition": {
-                            "functionBody": "return false && model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].displayType > 0;"
-                          }
-                        },
-                        {
-                          "title": "Buttons / Sensors",
-                          "type": "section",
-                          "description": "Section for setup control buttons / sensors",
-                          "expandable": true,
-                          "expanded": false,
-                          "items": [
-                            {
-                              "key": "accounts[].ataDevices[]",
-                              "type": "tabarray",
-                              "title": "{{ value.name }}",
-                              "items": [
-                                {
-                                  "title": "Temperature",
-                                  "items": [
-                                    "accounts[].ataDevices[].temperatureSensor",
-                                    "accounts[].ataDevices[].temperatureOutdoorSensor"
-                                  ]
-                                },
-                                {
-                                  "title": "System",
-                                  "items": [
-                                    "accounts[].ataDevices[].inStandbySensor",
-                                    "accounts[].ataDevices[].connectSensor",
-                                    "accounts[].ataDevices[].errorSensor"
-                                  ]
-                                },
-                                {
-                                  "title": "Custom",
-                                  "items": [
-                                    {
-                                      "key": "accounts[].ataDevices[].buttonsSensors",
-                                      "type": "tabarray",
-                                      "title": "{{ value.name }}",
-                                      "items": [
-                                        "accounts[].ataDevices[].buttonsSensors[].displayType",
-                                        "accounts[].ataDevices[].buttonsSensors[].mode",
-                                        "accounts[].ataDevices[].buttonsSensors[].name",
-                                        "accounts[].ataDevices[].buttonsSensors[].namePrefix"
-                                      ]
-                                    }
-                                  ]
-                                }
-                              ]
-                            }
-                          ],
-                          "condition": {
-                            "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].displayType > 0;"
-                          }
-                        }
-                      ],
-                      "condition": {
-                        "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].id !== '0';"
-                      }
-                    }
-                  ]
-                }
-              ]
+                "accounts[].ataDevices[].name",
+                "accounts[].ataDevices[].heatDryFanMode",
+                "accounts[].ataDevices[].coolDryFanMode",
+                "accounts[].ataDevices[].autoDryFanMode"
+              ],
+              "condition": {
+                "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].displayType > 0;"
+              }
             },
             {
-              "title": "Heat Pump",
-              "items": []
-            },
-            {
-              "title": "Energy Recovery Ventilation",
-              "items": []
+              "title": "External Sensor",
+              "type": "section",
+              "description": "External temperature sensor settings",
+              "expandable": true,
+              "expanded": false,
+              "items": [
+                "accounts[].ataDevices[].externalSensor.enabled",
+                "accounts[].ataDevices[].externalSensor.type",
+                "accounts[].ataDevices[].externalSensor.shellyServerUri",
+                "accounts[].ataDevices[].externalSensor.shellyAuthKey",
+                "accounts[].ataDevices[].externalSensor.shellyDeviceId",
+                "accounts[].ataDevices[].externalSensor.compensationEnabled",
+                "accounts[].ataDevices[].externalSensor.hysteresis",
+                "accounts[].ataDevices[].externalSensor.pollInterval"
+              ],
+              "condition": {
+                "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].displayType > 0;"
+              }
             }
           ],
           "condition": {
-            "functionBody": "return model.accounts[arrayIndices].type !== 'disabled';"
+            "functionBody": "return model.accounts[arrayIndices[0]].type !== 'disabled';"
           }
         },
         {
@@ -1386,45 +380,22 @@
           "expandable": true,
           "expanded": false,
           "items": [
+            "accounts[].refreshInterval",
             {
-              "key": "accounts[]",
-              "type": "tabarray",
-              "title": "{{ value.name }}",
+              "key": "accounts[].log",
+              "title": "Log",
               "items": [
-                {
-                  "title": "Account",
-                  "items": [
-                    "accounts[].refreshInterval"
-                  ]
-                },
-                {
-                  "key": "accounts[].log",
-                  "title": "Log",
-                  "items": [
-                    "accounts[].log.deviceInfo",
-                    "accounts[].log.success",
-                    "accounts[].log.info",
-                    "accounts[].log.warn",
-                    "accounts[].log.error",
-                    "accounts[].log.debug"
-                  ]
-                },
-                {
-                  "title": "External Integrations",
-                  "items": [
-                    {
-                      "key": "accounts[]",
-                      "type": "tabarray",
-                      "title": "{{ value.title }}",
-                      "items": []
-                    }
-                  ]
-                }
+                "accounts[].log.deviceInfo",
+                "accounts[].log.success",
+                "accounts[].log.info",
+                "accounts[].log.warn",
+                "accounts[].log.error",
+                "accounts[].log.debug"
               ]
             }
           ],
           "condition": {
-            "functionBody": "return model.accounts[arrayIndices].type !== 'disabled' && (model.accounts[arrayIndices].ataDevices.length > 0);"
+            "functionBody": "return model.accounts[arrayIndices].type !== 'disabled';"
           }
         }
       ]
