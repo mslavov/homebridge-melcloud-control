@@ -1,12 +1,12 @@
 {
-  "pluginAlias": "melcloudcontrol",
+  "pluginAlias": "melcloudpassivehouse",
   "pluginType": "platform",
   "singular": true,
   "fixArrays": true,
   "strictValidation": true,
   "customUi": true,
-  "headerDisplay": "Plugin for Mitsubishi Air Conditioner (ATA devices) connected to MELCloud. Devices are exposed to HomeKit as separate accessories and each needs to be manually [paired](https://github.com/grzegorz914/homebridge-melcloud-control/wiki#adding-to-homekit).",
-  "footerDisplay": "For documentation please see [GitHub repository](https://github.com/grzegorz914/homebridge-melcloud-control).",
+  "headerDisplay": "Passive house climate control for Mitsubishi AC via MELCloud. Features predictive temperature management using weather forecasts, external temperature sensors (Shelly), and optional thermal learning via InfluxDB.",
+  "footerDisplay": "For documentation please see [GitHub repository](https://github.com/mslavov/homebridge-melcloud-passive-house).",
   "schema": {
     "type": "object",
     "properties": {

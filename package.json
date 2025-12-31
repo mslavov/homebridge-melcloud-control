@@ -1,20 +1,20 @@
 {
-  "displayName": "MELCloud External Sensor",
-  "name": "homebridge-melcloud-external-sensor",
-  "version": "1.1.0",
-  "description": "Homebridge plugin to control Mitsubishi Air Conditioner with external temperature sensor support (Shelly). Fork of homebridge-melcloud-control by grzegorz914.",
+  "displayName": "MELCloud Passive House",
+  "name": "homebridge-melcloud-passive-house",
+  "version": "1.0.0",
+  "description": "Homebridge plugin for passive house climate control using Mitsubishi AC via MELCloud. Features predictive temperature management, external sensors (Shelly), weather forecasting, and thermal learning.",
   "license": "MIT",
   "author": "mslavov",
   "contributors": [
-    "grzegorz914 (original author)"
+    "grzegorz914 (original homebridge-melcloud-control author)"
   ],
-  "homepage": "https://github.com/mslavov/homebridge-melcloud-control#readme",
+  "homepage": "https://github.com/mslavov/homebridge-melcloud-passive-house#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mslavov/homebridge-melcloud-control.git"
+    "url": "git+https://github.com/mslavov/homebridge-melcloud-passive-house.git"
   },
   "bugs": {
-    "url": "https://github.com/mslavov/homebridge-melcloud-control/issues"
+    "url": "https://github.com/mslavov/homebridge-melcloud-passive-house/issues"
   },
   "type": "module",
   "exports": {
@@ -49,9 +49,13 @@
     "homekit",
     "mitsubishi",
     "melcloud",
+    "passive-house",
+    "passivhaus",
+    "predictive",
     "shelly",
-    "external-sensor",
-    "temperature-compensation"
+    "weather-forecast",
+    "thermal-learning",
+    "influxdb"
   ],
   "scripts": {
     "test": "node --test test/*.test.js"

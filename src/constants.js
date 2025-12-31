@@ -1,5 +1,5 @@
-export const PlatformName = "melcloudcontrol";
-export const PluginName = "homebridge-melcloud-control";
+export const PlatformName = "melcloudpassivehouse";
+export const PluginName = "homebridge-melcloud-passive-house";
 
 export const ApiUrls = {
     Base: "https://app.melcloud.com/Mitsubishi.Wifi.Client",
