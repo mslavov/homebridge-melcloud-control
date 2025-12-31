@@ -117,58 +117,41 @@
                     "default": "Air Conditioner",
                     "description": "Here set Your own name displayed in HomeKit."
                   },
-                  "heatDryFanMode": {
-                    "title": "Heat",
-                    "type": "integer",
-                    "minimum": 0,
-                    "maximum": 3,
-                    "default": 1,
-                    "description": "Select the operating mode for Heat, work only if mode supported by device.",
-                    "anyOf": [
-                      { "title": "None / Disabled", "enum": [0] },
-                      { "title": "Heat", "enum": [1] },
-                      { "title": "Dry", "enum": [2] },
-                      { "title": "Fan", "enum": [3] }
-                    ]
+                  "targetTemperature": {
+                    "title": "Target Temperature (°C)",
+                    "type": "number",
+                    "default": 23,
+                    "minimum": 18,
+                    "maximum": 28,
+                    "description": "Target midpoint temperature. HomeKit shows ±3°C comfort band around this value."
                   },
-                  "coolDryFanMode": {
-                    "title": "Cool",
-                    "type": "integer",
-                    "minimum": 0,
-                    "maximum": 3,
-                    "default": 1,
-                    "description": "Select the operating mode for Cool, work only if mode supported by device.",
-                    "anyOf": [
-                      { "title": "None / Disabled", "enum": [0] },
-                      { "title": "Cool", "enum": [1] },
-                      { "title": "Dry", "enum": [2] },
-                      { "title": "Fan", "enum": [3] }
-                    ]
-                  },
-                  "autoDryFanMode": {
-                    "title": "Auto",
-                    "type": "integer",
-                    "minimum": 0,
-                    "maximum": 3,
-                    "default": 1,
-                    "description": "Select the operating mode for Auto, work only if mode supported by device.",
-                    "anyOf": [
-                      { "title": "None / Disabled", "enum": [0] },
-                      { "title": "Auto", "enum": [1] },
-                      { "title": "Dry", "enum": [2] },
-                      { "title": "Fan", "enum": [3] }
-                    ]
+                  "location": {
+                    "title": "Location",
+                    "type": "object",
+                    "description": "Location coordinates for weather forecast (required for predictive control).",
+                    "properties": {
+                      "latitude": {
+                        "title": "Latitude",
+                        "type": "number",
+                        "minimum": -90,
+                        "maximum": 90,
+                        "description": "Location latitude in decimal degrees (e.g., 42.6977 for Sofia)."
+                      },
+                      "longitude": {
+                        "title": "Longitude",
+                        "type": "number",
+                        "minimum": -180,
+                        "maximum": 180,
+                        "description": "Location longitude in decimal degrees (e.g., 23.3219 for Sofia)."
+                      }
+                    },
+                    "required": ["latitude", "longitude"]
                   },
                   "externalSensor": {
                     "title": "External Temperature Sensor",
                     "type": "object",
+                    "description": "External temperature sensor configuration (required for accurate room temperature).",
                     "properties": {
-                      "enabled": {
-                        "title": "Enable External Sensor",
-                        "type": "boolean",
-                        "default": false,
-                        "description": "Enable external temperature sensor for more accurate room temperature readings."
-                      },
                       "type": {
                         "title": "Sensor Type",
                         "type": "string",
@@ -176,55 +159,23 @@
                         "description": "Type of external sensor.",
                         "oneOf": [
                           { "title": "Shelly Cloud", "enum": ["shelly"] }
-                        ],
-                        "condition": {
-                          "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].externalSensor?.enabled === true;"
-                        }
+                        ]
                       },
                       "shellyServerUri": {
                         "title": "Shelly Server URI",
                         "type": "string",
                         "placeholder": "shelly-58-eu.shelly.cloud",
-                        "description": "Shelly Cloud server URI (found in Shelly App -> User Settings).",
-                        "condition": {
-                          "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].externalSensor?.enabled === true && model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].externalSensor?.type === 'shelly';"
-                        }
+                        "description": "Shelly Cloud server URI (found in Shelly App -> User Settings)."
                       },
                       "shellyAuthKey": {
                         "title": "Shelly Auth Key",
                         "type": "string",
-                        "description": "Shelly Cloud API authentication key.",
-                        "condition": {
-                          "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].externalSensor?.enabled === true && model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].externalSensor?.type === 'shelly';"
-                        }
+                        "description": "Shelly Cloud API authentication key."
                       },
                       "shellyDeviceId": {
                         "title": "Shelly Device ID",
                         "type": "string",
-                        "description": "Shelly device ID (found in Device -> Settings -> Device Information).",
-                        "condition": {
-                          "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].externalSensor?.enabled === true && model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].externalSensor?.type === 'shelly';"
-                        }
-                      },
-                      "compensationEnabled": {
-                        "title": "Enable Temperature Compensation",
-                        "type": "boolean",
-                        "default": true,
-                        "description": "Automatically adjust target temperature to compensate for sensor offset.",
-                        "condition": {
-                          "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].externalSensor?.enabled === true;"
-                        }
-                      },
-                      "hysteresis": {
-                        "title": "Hysteresis (°C)",
-                        "type": "number",
-                        "default": 0.5,
-                        "minimum": 0,
-                        "maximum": 3,
-                        "description": "Minimum temperature offset before compensation is applied.",
-                        "condition": {
-                          "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].externalSensor?.enabled === true && model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].externalSensor?.compensationEnabled === true;"
-                        }
+                        "description": "Shelly device ID (found in Device -> Settings -> Device Information)."
                       },
                       "pollInterval": {
                         "title": "Poll Interval (seconds)",
@@ -232,19 +183,68 @@
                         "default": 60,
                         "minimum": 30,
                         "maximum": 300,
-                        "description": "How often to poll the external sensor.",
-                        "condition": {
-                          "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].externalSensor?.enabled === true;"
-                        }
+                        "description": "How often to poll the external sensor."
+                      }
+                    },
+                    "required": ["shellyServerUri", "shellyAuthKey", "shellyDeviceId"]
+                  },
+                  "influxDb": {
+                    "title": "InfluxDB Logging",
+                    "type": "object",
+                    "description": "Optional InfluxDB 1.8 logging for thermal data analysis and learning.",
+                    "properties": {
+                      "enabled": {
+                        "title": "Enable InfluxDB Logging",
+                        "type": "boolean",
+                        "default": false,
+                        "description": "Enable logging thermal data to InfluxDB for analysis."
+                      },
+                      "host": {
+                        "title": "InfluxDB Host",
+                        "type": "string",
+                        "default": "localhost",
+                        "description": "InfluxDB server hostname or IP address."
+                      },
+                      "port": {
+                        "title": "InfluxDB Port",
+                        "type": "integer",
+                        "default": 8086,
+                        "minimum": 1,
+                        "maximum": 65535,
+                        "description": "InfluxDB server port."
+                      },
+                      "database": {
+                        "title": "Database Name",
+                        "type": "string",
+                        "default": "homebridge",
+                        "description": "InfluxDB database name."
+                      },
+                      "username": {
+                        "title": "Username",
+                        "type": "string",
+                        "description": "InfluxDB username (optional if no auth)."
+                      },
+                      "password": {
+                        "title": "Password",
+                        "type": "string",
+                        "description": "InfluxDB password (optional if no auth).",
+                        "format": "password"
+                      },
+                      "retentionDays": {
+                        "title": "Retention (days)",
+                        "type": "integer",
+                        "default": 30,
+                        "minimum": 7,
+                        "maximum": 365,
+                        "description": "How long to keep thermal data."
                       }
                     }
                   }
                 },
                 "required": [
                   "displayType",
-                  "heatDryFanMode",
-                  "coolDryFanMode",
-                  "autoDryFanMode"
+                  "location",
+                  "externalSensor"
                 ]
               }
             },
@@ -333,16 +333,28 @@
             },
             "accounts[].ataDevices[].displayType",
             {
-              "title": "Settings",
+              "title": "Predictive Control",
               "type": "section",
-              "description": "Device settings",
+              "description": "Passive house predictive temperature control settings",
               "expandable": true,
-              "expanded": false,
+              "expanded": true,
               "items": [
                 "accounts[].ataDevices[].name",
-                "accounts[].ataDevices[].heatDryFanMode",
-                "accounts[].ataDevices[].coolDryFanMode",
-                "accounts[].ataDevices[].autoDryFanMode"
+                "accounts[].ataDevices[].targetTemperature"
+              ],
+              "condition": {
+                "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].displayType > 0;"
+              }
+            },
+            {
+              "title": "Location",
+              "type": "section",
+              "description": "Location for weather forecast (required)",
+              "expandable": true,
+              "expanded": true,
+              "items": [
+                "accounts[].ataDevices[].location.latitude",
+                "accounts[].ataDevices[].location.longitude"
               ],
               "condition": {
                 "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].displayType > 0;"
@@ -351,18 +363,34 @@
             {
               "title": "External Sensor",
               "type": "section",
-              "description": "External temperature sensor settings",
+              "description": "External temperature sensor (required)",
               "expandable": true,
-              "expanded": false,
+              "expanded": true,
               "items": [
-                "accounts[].ataDevices[].externalSensor.enabled",
                 "accounts[].ataDevices[].externalSensor.type",
                 "accounts[].ataDevices[].externalSensor.shellyServerUri",
                 "accounts[].ataDevices[].externalSensor.shellyAuthKey",
                 "accounts[].ataDevices[].externalSensor.shellyDeviceId",
-                "accounts[].ataDevices[].externalSensor.compensationEnabled",
-                "accounts[].ataDevices[].externalSensor.hysteresis",
                 "accounts[].ataDevices[].externalSensor.pollInterval"
+              ],
+              "condition": {
+                "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].displayType > 0;"
+              }
+            },
+            {
+              "title": "InfluxDB Logging",
+              "type": "section",
+              "description": "Optional thermal data logging to InfluxDB",
+              "expandable": true,
+              "expanded": false,
+              "items": [
+                "accounts[].ataDevices[].influxDb.enabled",
+                "accounts[].ataDevices[].influxDb.host",
+                "accounts[].ataDevices[].influxDb.port",
+                "accounts[].ataDevices[].influxDb.database",
+                "accounts[].ataDevices[].influxDb.username",
+                "accounts[].ataDevices[].influxDb.password",
+                "accounts[].ataDevices[].influxDb.retentionDays"
               ],
               "condition": {
                 "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].displayType > 0;"

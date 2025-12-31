@@ -2,10 +2,36 @@ import { AirConditioner, TemperatureDisplayUnits } from '../../constants.js';
 
 /**
  * HeaterCooler service for displayType 1
+ * Modified for predictive passive house control with comfort band
  */
 export class HeaterCoolerService {
     constructor(device) {
         this.device = device;
+    }
+
+    /**
+     * Get temperature range based on predictive control config
+     * Returns comfort band if predictive control is enabled
+     */
+    _getTemperatureRange(state) {
+        const d = this.device;
+
+        // If predictive controller is available, use comfort band
+        if (d.predictiveController) {
+            const range = d.predictiveController.getComfortRange();
+            return {
+                minValue: range.min,
+                maxValue: range.max,
+                minStep: 0.5
+            };
+        }
+
+        // Fallback to device limits
+        return {
+            minValue: state.minTempCoolDryAuto,
+            maxValue: state.maxTempCoolDryAuto,
+            minStep: state.temperatureStep
+        };
     }
 
     create(accessory, serviceName, deviceId) {
@@ -113,14 +139,16 @@ export class HeaterCoolerService {
         }
 
         // Cooling threshold temperature
+        // Uses comfort band range when predictive control is enabled
+        const coolingTempRange = this._getTemperatureRange(state);
         service.getCharacteristic(Characteristic.CoolingThresholdTemperature)
-            .setProps({
-                minValue: state.minTempCoolDryAuto,
-                maxValue: state.maxTempCoolDryAuto,
-                minStep: state.temperatureStep
-            })
+            .setProps(coolingTempRange)
             .onGet(async () => {
-                if (d.externalSensorEnabled && d.userTargetTemperature !== null) {
+                // Return user's comfort preference (not actual AC setpoint)
+                if (d.predictiveController) {
+                    return d.predictiveController.getUserComfortPreference();
+                }
+                if (d.userTargetTemperature !== null) {
                     return d.userTargetTemperature;
                 }
                 const s = d.accessoryState;
@@ -128,12 +156,25 @@ export class HeaterCoolerService {
             })
             .onSet(async (value) => {
                 try {
+                    // Store user's comfort preference
                     d.userTargetTemperature = value;
-                    const tempKey = d.accessoryState.operationMode === 8 ? 'DefaultCoolingSetTemperature' : 'SetTemperature';
-                    const compensatedValue = d.externalSensor.getCompensatedTargetTemperature(value);
+
+                    // Calculate setpoint through predictive controller if available
+                    let setpoint = value;
+                    if (d.predictiveController) {
+                        setpoint = d.predictiveController.getPredictiveSetpoint(value);
+                        if (d.logDebug) d.emit('debug', `Predictive setpoint: ${value}°C → ${setpoint}°C`);
+                    }
+
+                    // Apply external sensor compensation
+                    const compensatedValue = d.externalSensor.getCompensatedTargetTemperature(setpoint);
                     d.lastCompensatedTarget = compensatedValue;
-                    d.deviceData.Device[tempKey] = compensatedValue < 16 ? 16 : compensatedValue;
-                    if (d.logInfo) d.emit('info', `Set cooling threshold temperature: ${value}${d.accessoryState.temperatureUnit}`);
+
+                    // Send to AC
+                    const tempKey = d.accessoryState.operationMode === 8 ? 'DefaultCoolingSetTemperature' : 'SetTemperature';
+                    d.deviceData.Device[tempKey] = Math.max(16, compensatedValue);
+
+                    if (d.logInfo) d.emit('info', `Set cooling temperature: ${value}°C (AC setpoint: ${compensatedValue}°C)`);
                     await d.melCloudAta.send(d.accountType, d.displayType, d.deviceData, AirConditioner.EffectiveFlags.SetTemperature);
                 } catch (error) {
                     if (d.logWarn) d.emit('warn', `Set cooling threshold temperature error: ${error}`);
@@ -141,15 +182,17 @@ export class HeaterCoolerService {
             });
 
         // Heating threshold temperature
+        // Uses comfort band range when predictive control is enabled
         if (state.supportsHeat) {
+            const heatingTempRange = this._getTemperatureRange(state);
             service.getCharacteristic(Characteristic.HeatingThresholdTemperature)
-                .setProps({
-                    minValue: state.minTempHeat,
-                    maxValue: state.maxTempHeat,
-                    minStep: state.temperatureStep
-                })
+                .setProps(heatingTempRange)
                 .onGet(async () => {
-                    if (d.externalSensorEnabled && d.userTargetTemperature !== null) {
+                    // Return user's comfort preference (not actual AC setpoint)
+                    if (d.predictiveController) {
+                        return d.predictiveController.getUserComfortPreference();
+                    }
+                    if (d.userTargetTemperature !== null) {
                         return d.userTargetTemperature;
                     }
                     const s = d.accessoryState;
@@ -157,12 +200,25 @@ export class HeaterCoolerService {
                 })
                 .onSet(async (value) => {
                     try {
+                        // Store user's comfort preference
                         d.userTargetTemperature = value;
-                        const tempKey = d.accessoryState.operationMode === 8 ? 'DefaultHeatingSetTemperature' : 'SetTemperature';
-                        const compensatedValue = d.externalSensor.getCompensatedTargetTemperature(value);
+
+                        // Calculate setpoint through predictive controller if available
+                        let setpoint = value;
+                        if (d.predictiveController) {
+                            setpoint = d.predictiveController.getPredictiveSetpoint(value);
+                            if (d.logDebug) d.emit('debug', `Predictive setpoint: ${value}°C → ${setpoint}°C`);
+                        }
+
+                        // Apply external sensor compensation
+                        const compensatedValue = d.externalSensor.getCompensatedTargetTemperature(setpoint);
                         d.lastCompensatedTarget = compensatedValue;
+
+                        // Send to AC
+                        const tempKey = d.accessoryState.operationMode === 8 ? 'DefaultHeatingSetTemperature' : 'SetTemperature';
                         d.deviceData.Device[tempKey] = compensatedValue;
-                        if (d.logInfo) d.emit('info', `Set heating threshold temperature: ${value}${d.accessoryState.temperatureUnit}`);
+
+                        if (d.logInfo) d.emit('info', `Set heating temperature: ${value}°C (AC setpoint: ${compensatedValue}°C)`);
                         await d.melCloudAta.send(d.accountType, d.displayType, d.deviceData, AirConditioner.EffectiveFlags.SetTemperature);
                     } catch (error) {
                         if (d.logWarn) d.emit('warn', `Set heating threshold temperature error: ${error}`);

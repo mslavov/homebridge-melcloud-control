@@ -36,9 +36,10 @@
   },
   "dependencies": {
     "@homebridge/plugin-ui-utils": "^2.1.2",
-    "mqtt": "^5.14.1",
     "axios": "^1.13.2",
     "express": "^5.2.1",
+    "influx": "^5.9.3",
+    "mqtt": "^5.14.1",
     "puppeteer": "^24.34.0",
     "ws": "^8.18.3"
   },

@@ -6,6 +6,8 @@ import { ExternalSensor } from './external-sensor.js';
 import { StateParser } from './state-parser.js';
 import { StateUpdater } from './state-updater.js';
 import { ServiceFactory } from './services/index.js';
+import { PredictiveController } from './predictive/index.js';
+import { ThermalManager } from './thermal/index.js';
 
 class DeviceAta extends EventEmitter {
     constructor(api, account, device, defaultTempsFile, accountInfo, accountFile, melcloud, melcloudDevicesList) {
@@ -39,13 +41,21 @@ class DeviceAta extends EventEmitter {
         this.coolDryFanMode = device.coolDryFanMode || 1;
         this.autoDryFanMode = device.autoDryFanMode || 1;
 
-        // External sensor config
+        // External sensor config (required for predictive control)
         this.externalSensorConfig = device.externalSensor || {};
-        this.externalSensorEnabled = this.externalSensorConfig.enabled || false;
+        this.externalSensorEnabled = true; // Always enabled in predictive mode
         this.externalSensorType = this.externalSensorConfig.type || 'shelly';
-        this.compensationEnabled = this.externalSensorConfig.compensationEnabled ?? true;
-        this.hysteresis = this.externalSensorConfig.hysteresis || 0.5;
+        this.compensationEnabled = true; // Always enabled in predictive mode
+        this.hysteresis = 0.5;
         this.pollInterval = (this.externalSensorConfig.pollInterval || 60) * 1000;
+
+        // Predictive control config
+        this.targetTemperature = device.targetTemperature || 23;
+        this.location = device.location || {};
+
+        // InfluxDB config (optional)
+        this.influxConfig = device.influxDb || {};
+        this.influxEnabled = this.influxConfig.enabled || false;
 
         // External sensor state
         this.externalTemperature = null;
@@ -77,6 +87,10 @@ class DeviceAta extends EventEmitter {
         this.stateParser = new StateParser(this);
         this.stateUpdater = new StateUpdater(this);
         this.serviceFactory = new ServiceFactory(this);
+        this.predictiveController = new PredictiveController(this);
+
+        // Thermal manager (optional, created if InfluxDB enabled)
+        this.thermalManager = this.influxEnabled ? new ThermalManager(this) : null;
 
         // Service references (populated during prepareAccessory)
         this.services = {};
@@ -131,6 +145,14 @@ class DeviceAta extends EventEmitter {
                     // Update all services
                     this.stateUpdater.update();
 
+                    // Process through predictive controller
+                    this.predictiveController.processStateUpdate(deviceData);
+
+                    // Log data to thermal manager (if enabled)
+                    if (this.thermalManager) {
+                        this.thermalManager.logDataPoint(deviceData);
+                    }
+
                     // Log current state
                     this.stateUpdater.logState();
                 })
@@ -140,9 +162,15 @@ class DeviceAta extends EventEmitter {
                 .on('warn', (warn) => this.emit('warn', warn))
                 .on('error', (error) => this.emit('error', error));
 
-            // Start external sensor
-            if (this.externalSensorEnabled) {
-                await this.externalSensor.init();
+            // Start external sensor (required)
+            await this.externalSensor.init();
+
+            // Start predictive controller (required)
+            await this.predictiveController.init();
+
+            // Start thermal manager (optional, if InfluxDB enabled)
+            if (this.thermalManager) {
+                await this.thermalManager.init();
             }
 
             // Check state
