@@ -1,7 +1,5 @@
 import EventEmitter from 'events';
 import MelCloudAta from './melcloudata.js';
-import RestFul from './restful.js';
-import Mqtt from './mqtt.js';
 import ShellyCloud from './shellycloud.js';
 import Functions from './functions.js';
 import { TemperatureDisplayUnits, AirConditioner, DeviceType } from './constants.js';
@@ -72,12 +70,6 @@ class DeviceAta extends EventEmitter {
         this.accountInfo = accountInfo;
         this.accountFile = accountFile;
 
-        //external integrations
-        this.restFul = account.restFul ?? {};
-        this.restFulConnected = false;
-        this.mqtt = account.mqtt ?? {};
-        this.mqttConnected = false;
-
         const serviceType = [null, Service.MotionSensor, Service.OccupancySensor, Service.ContactSensor, Service.MotionSensor, Service.OccupancySensor, Service.ContactSensor, null];
         const characteristicType = [null, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState, null];
 
@@ -122,83 +114,7 @@ class DeviceAta extends EventEmitter {
         this.accessory = {};
     }
 
-    async externalIntegrations() {
-        //RESTFul server
-        const restFulEnabled = this.restFul.enable || false;
-        if (restFulEnabled) {
-            try {
-                this.restFul1 = new RestFul({
-                    port: this.restFul.port,
-                    logWarn: this.logWarn,
-                    logDebug: this.logDebug
-                })
-                    .on('connected', (message) => {
-                        this.restFulConnected = true;
-                        this.emit('success', message);
-                    })
-                    .on('set', async (key, value) => {
-                        try {
-                            await this.setOverExternalIntegration('RESTFul', this.deviceData, key, value);
-                        } catch (error) {
-                            this.emit('warn', error);
-                        };
-                    })
-                    .on('debug', (debug) => {
-                        this.emit('debug', debug);
-                    })
-                    .on('warn', (warn) => {
-                        this.emit('warn', warn);
-                    })
-                    .on('error', (error) => {
-                        this.emit('error', error);
-                    });
-            } catch (error) {
-                if (this.logWarn) this.emit('warn', `RESTFul integration start error: ${error}`);
-            };
-        }
-
-        //MQTT client
-        const mqttEnabled = this.mqtt.enable || false;
-        if (mqttEnabled) {
-            try {
-                this.mqtt1 = new Mqtt({
-                    host: this.mqtt.host,
-                    port: this.mqtt.port || 1883,
-                    clientId: this.mqtt.clientId ? `melcloud_${this.mqtt.clientId}_${Math.random().toString(16).slice(3)}` : `melcloud_${Math.random().toString(16).slice(3)}`,
-                    prefix: this.mqtt.prefix ? `melcloud/${this.mqtt.prefix}/${this.deviceTypeString}/${this.deviceName}` : `melcloud/${this.deviceTypeString}/${this.deviceName}`,
-                    user: this.mqtt.auth?.user,
-                    passwd: this.mqtt.auth?.passwd,
-                    logWarn: this.logWarn,
-                    logDebug: this.logDebug
-                })
-                    .on('connected', (message) => {
-                        this.mqttConnected = true;
-                        this.emit('success', message);
-                    })
-                    .on('subscribed', (message) => {
-                        this.emit('success', message);
-                    })
-                    .on('set', async (key, value) => {
-                        try {
-                            await this.setOverExternalIntegration('MQTT', this.deviceData, key, value);
-                        } catch (error) {
-                            this.emit('warn', error);
-                        };
-                    })
-                    .on('debug', (debug) => {
-                        this.emit('debug', debug);
-                    })
-                    .on('warn', (warn) => {
-                        this.emit('warn', warn);
-                    })
-                    .on('error', (error) => {
-                        this.emit('error', error);
-                    });
-            } catch (error) {
-                if (this.logWarn) this.emit('warn', `MQTT integration start error: ${error}`);
-            };
-        }
-
+    async initExternalSensor() {
         //Shelly external temperature sensor
         if (this.externalSensorEnabled && this.externalSensorType === 'shelly') {
             try {
@@ -235,110 +151,6 @@ class DeviceAta extends EventEmitter {
         }
 
         return true;
-    }
-
-    async setOverExternalIntegration(integration, deviceData, key, value) {
-        try {
-            let set = false
-            let flag = null;
-            switch (key) {
-                case 'Power':
-                    deviceData.Device[key] = value;
-                    flag = AirConditioner.EffectiveFlags.Power;
-                    break;
-                case 'OperationMode':
-                    deviceData.Device[key] = value;
-                    flag = AirConditioner.EffectiveFlags.OperationMode
-                    break;
-                case 'SetTemperature':
-                    deviceData.Device[key] = value;
-                    flag = AirConditioner.EffectiveFlags.SetTemperature;
-                    break;
-                case 'DefaultCoolingSetTemperature':
-                    deviceData.Device[key] = value;
-                    flag = AirConditioner.EffectiveFlags.SetTemperature;
-                    break;
-                case 'DefaultHeatingSetTemperature':
-                    deviceData.Device[key] = value;
-                    flag = AirConditioner.EffectiveFlags.SetTemperature;
-                    break;
-                case 'FanSpeed':
-                    key = this.accountType === 'melcloud' ? key : 'SetFanSpeed';
-                    deviceData.Device[key] = value;
-                    flag = AirConditioner.EffectiveFlags.SetFanSpeed;
-                    break;
-                case 'VaneHorizontalDirection':
-                    deviceData.Device[key] = value;
-                    flag = AirConditioner.EffectiveFlags.VaneHorizontalDirection;
-                    break;
-                case 'VaneVerticalDirection':
-                    deviceData.Device[key] = value;
-                    flag = AirConditioner.EffectiveFlags.VaneVerticalDirection;
-                    break;
-                case 'HideVaneControls':
-                    if (this.accountType === 'melcloudhome') return;
-
-                    deviceData[key] = value;
-                    flag = AirConditioner.EffectiveFlags.Prohibit;
-                    break;
-                case 'HideDryModeControl':
-                    if (this.accountType === 'melcloudhome') return;
-
-                    deviceData[key] = value;
-                    flag = AirConditioner.EffectiveFlags.Prohibit;
-                    break;
-                case 'ProhibitSetTemperature':
-                    if (this.accountType === 'melcloudhome') return;
-
-                    deviceData.Device[key] = value;
-                    flag = AirConditioner.EffectiveFlags.Prohibit;
-                    break;
-                case 'ProhibitOperationMode':
-                    if (this.accountType === 'melcloudhome') return;
-
-                    deviceData.Device[key] = value;
-                    flag = AirConditioner.EffectiveFlags.Prohibit;
-                    break;
-                case 'ProhibitPower':
-                    if (this.accountType === 'melcloudhome') return;
-
-                    deviceData.Device[key] = value;
-                    flag = AirConditioner.EffectiveFlags.Prohibit;
-                    break;
-                case 'FrostProtection':
-                    if (this.accountType === 'melcloud') return;
-
-                    deviceData.Device[key].Enabled = value;
-                    flag = 'frostprotection';
-                    break;
-                case 'OverheatProtection':
-                    if (this.accountType === 'melcloud') return;
-
-                    deviceData.Device[key].Enabled = value;
-                    flag = 'overheatprotection';
-                    break;
-                case 'Schedules':
-                    if (this.accountType === 'melcloud') return;
-
-                    deviceData.Device[key].Enabled = value;
-                    flag = 'schedule';
-                    break;
-                case 'HolidayMode':
-                    if (this.accountType === 'melcloud') return;
-
-                    deviceData.Device[key].Enabled = value;
-                    flag = 'holidaymode';
-                    break;
-                default:
-                    this.emit('warn', `${integration}, received key: ${key}, value: ${value}`);
-                    break;
-            };
-
-            set = await this.melCloudAta.send(this.accountType, this.displayType, deviceData, flag);
-            return set;
-        } catch (error) {
-            throw new Error(`${integration} set key: ${key}, value: ${value}, error: ${error.message ?? error}`);
-        };
     }
 
     //update temperature offset based on AC internal and external sensor readings
@@ -2195,16 +2007,10 @@ class DeviceAta extends EventEmitter {
                 .on('info', (info) => this.emit('info', info))
                 .on('debug', (debug) => this.emit('debug', debug))
                 .on('warn', (warn) => this.emit('warn', warn))
-                .on('error', (error) => this.emit('error', error))
-                .on('restFul', (path, data) => {
-                    if (this.restFulConnected) this.restFul1.update(path, data);
-                })
-                .on('mqtt', (topic, message) => {
-                    if (this.mqttConnected) this.mqtt1.emit('publish', topic, message);
-                });
+                .on('error', (error) => this.emit('error', error));
 
-            //start external integrations
-            if (this.restFul.enable || this.mqtt.enable || this.externalSensorEnabled) await this.externalIntegrations();
+            //start external sensor
+            if (this.externalSensorEnabled) await this.initExternalSensor();
 
             //check state
             await this.melCloudAta.checkState(this.melcloudDevicesList);

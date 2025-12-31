@@ -1,6 +1,5 @@
 import { HomebridgePluginUiServer } from '@homebridge/plugin-ui-utils';
 import MelCloud from '../src/melcloud.js';
-import MelCloudHome from '../src/melcloudhome.js';
 
 class PluginUiServer extends HomebridgePluginUiServer {
   constructor() {
@@ -17,7 +16,7 @@ class PluginUiServer extends HomebridgePluginUiServer {
     const accountName = account.name;
     const accountFile = `${this.homebridgeStoragePath}/melcloud/${accountName}_Account`;
     const buildingsFile = `${this.homebridgeStoragePath}/melcloud/${accountName}_Buildings`;
-    const melCloud = account.type === 'melcloud' ? new MelCloud(account, accountFile, buildingsFile) : new MelCloudHome(account, accountFile, buildingsFile);
+    const melCloud = new MelCloud(account, accountFile, buildingsFile);
 
     try {
       const accountInfo = await melCloud.connect();

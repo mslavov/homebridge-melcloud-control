@@ -1,10 +1,7 @@
 import { join } from 'path';
-import { mkdirSync, existsSync, writeFileSync } from 'fs';
+import { mkdirSync } from 'fs';
 import MelCloud from './src/melcloud.js';
-import MelCloudHome from './src/melcloudhome.js';
 import DeviceAta from './src/deviceata.js';
-import DeviceAtw from './src/deviceatw.js';
-import DeviceErv from './src/deviceerv.js';
 import ImpulseGenerator from './src/impulsegenerator.js';
 import { PluginName, PlatformName, DeviceType } from './src/constants.js';
 
@@ -53,13 +50,7 @@ class MelCloudPlatform {
 					log.info(`${name}, debug: did finish launching.`);
 					const safeConfig = {
 						...account,
-						passwd: 'removed',
-						mqtt: {
-							auth: {
-								...account.mqtt?.auth,
-								passwd: 'removed',
-							}
-						},
+						passwd: 'removed'
 					};
 					log.info(`${name}, Config: ${JSON.stringify(safeConfig, null, 2)}`);
 				}
@@ -74,21 +65,12 @@ class MelCloudPlatform {
 						.on('start', async () => {
 							try {
 								//melcloud account
-								let melcloud;
-								let timmers = []
-								switch (account.type) {
-									case 'melcloud':
-										timmers = [{ name: 'checkDevicesList', sampling: accountRefreshInterval }];
-										melcloud = new MelCloud(account, accountFile, buildingsFile, true);
-										break;
-									case 'melcloudhome':
-										timmers = [{ name: 'connect', sampling: 3300000 }, { name: 'checkDevicesList', sampling: 5000 }];
-										melcloud = new MelCloudHome(account, accountFile, buildingsFile, true);
-										break;
-									default:
-										if (logLevel.warn) log.warn(`Unknown account type: ${account.type}.`);
-										return;
+								if (account.type !== 'melcloud') {
+									if (logLevel.warn) log.warn(`Unknown account type: ${account.type}. Only 'melcloud' is supported.`);
+									return;
 								}
+								const timmers = [{ name: 'checkDevicesList', sampling: accountRefreshInterval }];
+								const melcloud = new MelCloud(account, accountFile, buildingsFile, true);
 								melcloud.on('success', (msg) => log.success(`${name}, ${msg}`))
 									.on('info', (msg) => log.info(`${name}, ${msg}`))
 									.on('debug', (msg) => log.info(`${name}, debug: ${msg}`))
@@ -115,12 +97,9 @@ class MelCloudPlatform {
 								//start account impulse generator
 								await melcloud.impulseGenerator.state(true, timmers, false);
 
-								//configured devices
-								const ataDevices = (account.ataDevices || []).filter(device => device.id != null && String(device.id) !== '0');
-								const atwDevices = (account.atwDevices || []).filter(device => device.id != null && String(device.id) !== '0');
-								const ervDevices = (account.ervDevices || []).filter(device => device.id != null && String(device.id) !== '0');
-								const devices = [...ataDevices, ...atwDevices, ...ervDevices];
-								if (logLevel.debug) log.info(`${name}, found configured devices ATA: ${ataDevices.length}, ATW: ${atwDevices.length}, ERV: ${ervDevices.length}.`);
+								//configured ATA devices only
+								const devices = (account.ataDevices || []).filter(device => device.id != null && String(device.id) !== '0');
+								if (logLevel.debug) log.info(`${name}, found ${devices.length} configured ATA devices.`);
 
 								for (const [index, device] of devices.entries()) {
 									device.id = String(device.id);
@@ -145,58 +124,18 @@ class MelCloudPlatform {
 
 									//presets
 									const presetIds = (deviceInMelCloud.Presets ?? []).map(p => String(p.ID));
-									const presets = account.type === 'melcloud' ? (device.presets || []).filter(p => (p.displayType ?? 0) > 0 && p.id !== '0' && presetIds.includes(p.id)) : [];
-
-									//schedules
-									const schedulesIds = (deviceInMelCloud.Schedule ?? []).map(s => String(s.Id));
-									const schedules = account.type === 'melcloudhome' ? (device.schedules || []).filter(s => (s.displayType ?? 0) > 0 && s.id !== '0' && schedulesIds.includes(s.id)) : [];
-
-									//scenes
-									const scenesIds = (melcloudDevicesList.Scenes ?? []).map(s => String(s.Id));
-									const scenes = account.type === 'melcloudhome' ? (device.scenes || []).filter(s => (s.displayType ?? 0) > 0 && s.id !== '0' && scenesIds.includes(s.id)) : [];
+									const presets = (device.presets || []).filter(p => (p.displayType ?? 0) > 0 && p.id !== '0' && presetIds.includes(p.id));
 
 									//buttons
 									const buttons = (device.buttonsSensors || []).filter(b => (b.displayType ?? 0) > 0);
 
-									// set rest ful port
-									account.restFul.port = (device.id).slice(-4).replace(/^0/, '9');
-
-									if (type === 'melcloudhome') {
-										account.restFul.port = `${3000}${index}`;
-
-										try {
-											const temps = {
-												defaultCoolingSetTemperature: 24,
-												defaultHeatingSetTemperature: 20
-											};
-
-											if (!existsSync(defaultTempsFile)) {
-												writeFileSync(defaultTempsFile, JSON.stringify(temps, null, 2));
-												if (logLevel.debug) log.debug(`Default temperature file created: ${defaultTempsFile}`);
-											}
-										} catch (error) {
-											if (logLevel.error) log.error(`${name}, ${deviceTypeString}, ${deviceName}, File init error: ${error.message}`);
-											continue;
-										}
+									//only ATA devices supported
+									if (deviceType !== 0) {
+										if (logLevel.warn) log.warn(`${name}, ${deviceTypeString}, ${deviceName}, only ATA devices are supported.`);
+										continue;
 									}
 
-									let configuredDevice;
-									switch (deviceType) {
-										case 0: //ATA
-											configuredDevice = new DeviceAta(api, account, device, presets, schedules, scenes, buttons, defaultTempsFile, accountInfo, accountFile, melcloud, melcloudDevicesList);
-											break;
-										case 1: //ATW
-											configuredDevice = new DeviceAtw(api, account, device, presets, schedules, scenes, buttons, defaultTempsFile, accountInfo, accountFile, melcloud, melcloudDevicesList);
-											break;
-										case 2:
-											break;
-										case 3: //ERV
-											configuredDevice = new DeviceErv(api, account, device, presets, schedules, scenes, buttons, defaultTempsFile, accountInfo, accountFile, melcloud, melcloudDevicesList);
-											break;
-										default:
-											if (logLevel.warn) log.warn(`${name}, ${deviceTypeString}, ${deviceName}, unknown device: ${deviceType}.`);
-											return;
-									}
+									const configuredDevice = new DeviceAta(api, account, device, presets, [], [], buttons, defaultTempsFile, accountInfo, accountFile, melcloud, melcloudDevicesList);
 
 									configuredDevice.on('devInfo', (info) => logLevel.devInfo && log.info(info))
 										.on('success', (msg) => log.success(`${name}, ${deviceTypeString}, ${deviceName}, ${msg}`))
