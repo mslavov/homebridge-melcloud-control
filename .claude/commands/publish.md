@@ -37,27 +37,40 @@ Version bump type: $ARGUMENTS (default: patch)
    - `git commit -m "chore: release vX.Y.Z"`
    - `git tag vX.Y.Z`
 
-5. **Push to remote**
+5. **Push to remote (triggers publish)**
    - `git push && git push --tags`
+   - The tag push triggers GitHub Actions workflow `.github/workflows/publish.yml`
+   - GitHub Actions publishes to npm using trusted publishing (OIDC)
 
-6. **Publish to npm**
-   - Check if logged in: `npm whoami`
-   - If not logged in, run: `npm login --auth-type web`
-     - This opens browser for authentication
-     - Wait for user to complete auth
-   - Publish: `npm publish --access public`
-
-7. **Verify**
+6. **Verify**
+   - Check GitHub Actions: https://github.com/mslavov/homebridge-melcloud-passive-house/actions
    - Confirm package is live: `npm view homebridge-melcloud-passive-house version`
 
-### NPM 2FA Notes
+### How Publishing Works
 
-- Use `--auth-type web` for login to trigger browser-based authentication
-- If publish fails with 404, user needs to login first
-- The browser will open automatically for OTP/2FA
+Publishing uses **npm trusted publishing** via GitHub Actions:
+
+- No npm tokens required - uses OIDC authentication
+- Triggered automatically when a `v*` tag is pushed
+- Runs tests before publishing
+- Adds provenance attestations for supply chain security
+- Workflow file: `.github/workflows/publish.yml`
+
+### First-Time Setup (One-Time)
+
+Before this workflow can publish, configure trusted publishing on npmjs.com:
+
+1. Go to: https://www.npmjs.com/package/homebridge-melcloud-passive-house/access
+2. Click "Add Trusted Publisher"
+3. Select "GitHub Actions"
+4. Configure:
+   - Repository owner: `mslavov`
+   - Repository name: `homebridge-melcloud-passive-house`
+   - Workflow filename: `publish.yml`
+   - Environment: (leave empty)
 
 ### Error Handling
 
-- If `npm publish` fails with 404: Run `npm login --auth-type web` and retry
-- If `npm publish` fails with 403: Check npm permissions
-- If `npm publish` fails with E426: 2FA required, use web login
+- If GitHub Actions fails: Check the workflow logs for errors
+- If publish fails with 404: Trusted publisher not configured (see setup above)
+- If tests fail: Fix tests before the publish can succeed
