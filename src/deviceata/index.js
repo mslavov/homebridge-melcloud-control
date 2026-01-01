@@ -8,6 +8,7 @@ import { StateUpdater } from './state-updater.js';
 import { ServiceFactory } from './services/index.js';
 import { PredictiveController } from './predictive/index.js';
 import { ThermalManager } from './thermal/index.js';
+import { ActionExecutor } from './action-executor.js';
 
 class DeviceAta extends EventEmitter {
     constructor(api, account, device, defaultTempsFile, accountInfo, accountFile, melcloud, melcloudDevicesList) {
@@ -88,6 +89,7 @@ class DeviceAta extends EventEmitter {
         this.stateUpdater = new StateUpdater(this);
         this.serviceFactory = new ServiceFactory(this);
         this.predictiveController = new PredictiveController(this);
+        this.actionExecutor = new ActionExecutor(this);
 
         // Thermal manager (optional, created if InfluxDB enabled)
         this.thermalManager = this.influxEnabled ? new ThermalManager(this) : null;
@@ -145,8 +147,11 @@ class DeviceAta extends EventEmitter {
                     // Update all services
                     this.stateUpdater.update();
 
-                    // Process through predictive controller
-                    this.predictiveController.processStateUpdate(deviceData);
+                    // Process through predictive controller and execute actions
+                    const stateResult = this.predictiveController.processStateUpdate(deviceData);
+                    if (stateResult.action) {
+                        await this.actionExecutor.executeAction(stateResult);
+                    }
 
                     // Log data to thermal manager (if enabled)
                     if (this.thermalManager) {

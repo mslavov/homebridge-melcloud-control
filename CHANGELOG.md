@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - (01.01.2026)
+
+### Added
+
+- **Autonomous AC Control**: The predictive control system now automatically executes actions via MELCloud API
+  - State machine transitions (HEATING_ACTIVE, COOLING_ACTIVE, etc.) now trigger actual AC commands
+  - New ActionExecutor module translates state machine decisions to API calls
+  - Rate limiting (60s minimum between autonomous commands) prevents API spam
+  - Combined API flags for efficient power + mode + setpoint updates
+
+### Fixed
+
+- State machine computed actions but never executed them (predictive control was informational only)
+
 ## [1.0.0] - (31.12.2024)
 
 ### Initial Release

@@ -137,6 +137,16 @@ The plugin maintains one of 8 states:
 | `COOLING_COAST` | Near target, coasting to avoid overshoot |
 | `SENSOR_FAULT` | External sensor unavailable |
 
+### Autonomous Control
+
+The plugin automatically controls the AC based on state machine decisions:
+- **HEATING_ACTIVE/PRE_HEAT**: Powers on, sets heat mode, adjusts setpoint
+- **COOLING_ACTIVE/PRE_COOL**: Powers on, sets cool mode, adjusts setpoint
+- **COAST states**: Adjusts setpoint while maintaining current mode
+- **STANDBY**: No action (AC remains in current state)
+
+Rate limiting ensures commands are sent no more than once per minute.
+
 ### Anti-Oscillation Protection
 
 - **Deadband**: 4°C total width prevents rapid switching
