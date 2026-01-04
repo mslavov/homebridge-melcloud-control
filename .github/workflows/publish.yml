@@ -27,5 +27,8 @@ jobs:
       - name: Run tests
         run: npm test
 
+      - name: Update npm for OIDC support
+        run: npm install -g npm@latest
+
       - name: Publish to npm
         run: npm publish --provenance --access public
