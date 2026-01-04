@@ -25,8 +25,7 @@ function createDeviceContext(deviceConfig, account = sampleAccount, accountInfo 
         coolDryFanMode: deviceConfig.coolDryFanMode || 1,
         autoDryFanMode: deviceConfig.autoDryFanMode || 1,
         accountInfo,
-        externalSensorEnabled: deviceConfig.externalSensor?.enabled || false,
-        externalTemperature: null,
+        roomCurrentTemp: null,
         userTargetTemperature: null,
         logWarn: false,
         emit: () => {}
@@ -58,8 +57,8 @@ describe('StateParser', () => {
         test('parses temperature values correctly', () => {
             const state = parser.parse(sampleDeviceData);
 
-            assert.strictEqual(state.roomTemperature, 26.5);
-            assert.strictEqual(state.setTemperature, 24);
+            assert.strictEqual(state.roomCurrentTemp, 26.5);
+            assert.strictEqual(state.acSetpoint, 24);
             assert.strictEqual(state.minTempHeat, 10);
             assert.strictEqual(state.maxTempHeat, 31);
         });
@@ -158,37 +157,30 @@ describe('StateParser', () => {
     });
 
     describe('External Sensor', () => {
-        test('uses external temperature when enabled', () => {
-            const deviceContext = createDeviceContext({
-                ...sampleDeviceConfig,
-                externalSensor: { enabled: true }
-            });
-            deviceContext.externalSensorEnabled = true;
-            deviceContext.externalTemperature = 25.0; // Different from AC sensor (26.5)
-
-            const parser = new StateParser(deviceContext);
-            const state = parser.parse(sampleDeviceData);
-
-            assert.strictEqual(state.roomTemperature, 25.0);
-            assert.strictEqual(state.acRoomTemperature, 26.5);
-        });
-
-        test('uses AC temperature when external sensor disabled', () => {
+        test('uses external temperature when available', () => {
             const deviceContext = createDeviceContext(sampleDeviceConfig);
+            deviceContext.roomCurrentTemp = 25.0; // Different from AC sensor (26.5)
+
             const parser = new StateParser(deviceContext);
             const state = parser.parse(sampleDeviceData);
 
-            assert.strictEqual(state.roomTemperature, 26.5);
-            assert.strictEqual(state.acRoomTemperature, 26.5);
+            assert.strictEqual(state.roomCurrentTemp, 25.0);
+            assert.strictEqual(state.acCurrentTemp, 26.5);
         });
 
-        test('uses user target temperature for display when external sensor enabled', () => {
-            const deviceContext = createDeviceContext({
-                ...sampleDeviceConfig,
-                externalSensor: { enabled: true }
-            });
-            deviceContext.externalSensorEnabled = true;
-            deviceContext.externalTemperature = 25.0;
+        test('uses AC temperature when external sensor not available', () => {
+            const deviceContext = createDeviceContext(sampleDeviceConfig);
+            deviceContext.roomCurrentTemp = null; // No external reading yet
+            const parser = new StateParser(deviceContext);
+            const state = parser.parse(sampleDeviceData);
+
+            assert.strictEqual(state.roomCurrentTemp, 26.5);
+            assert.strictEqual(state.acCurrentTemp, 26.5);
+        });
+
+        test('uses user target temperature for display when set', () => {
+            const deviceContext = createDeviceContext(sampleDeviceConfig);
+            deviceContext.roomCurrentTemp = 25.0;
             deviceContext.userTargetTemperature = 23.0; // User wants 23
 
             const parser = new StateParser(deviceContext);

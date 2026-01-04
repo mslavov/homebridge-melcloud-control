@@ -143,7 +143,7 @@ class PredictiveController extends EventEmitter {
      * This is the actual temperature to send to the AC
      */
     calculateSetpoint() {
-        const currentIndoorTemp = this.device.externalTemperature;
+        const currentIndoorTemp = this.device.roomCurrentTemp;
         const currentOutdoorTemp = this.weatherClient.getCurrentOutdoorTemp();
         const forecastTemps = this.weatherClient.getForecastTemperatures(24);
         const forecastSolar = this.weatherClient.getForecastSolarRadiation(24);
@@ -190,7 +190,7 @@ class PredictiveController extends EventEmitter {
      */
     processStateUpdate(deviceData) {
         // Get current temperatures
-        const currentTemp = this.device.externalTemperature;
+        const currentTemp = this.device.roomCurrentTemp;
         const userTarget = this.getUserComfortPreference();
         const acPowerState = deviceData?.Device?.Power || false;
 

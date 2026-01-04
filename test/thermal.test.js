@@ -18,7 +18,7 @@ function createMockDevice(overrides = {}) {
         deviceId: 'test-device-123',
         targetTemperature: 23,
         location: { latitude: 42.7, longitude: 23.3 },
-        externalTemperature: 22.5,
+        roomCurrentTemp: 22.5,
         userTargetTemperature: 23,
         logDebug: false,
         logInfo: false,
@@ -496,7 +496,7 @@ describe('Data Point Structure', () => {
         assert.strictEqual(logged.recuperatorTemp, 24.5);
         assert.strictEqual(logged.acSetpoint, 23);
         assert.strictEqual(logged.powerState, true);
-        assert.strictEqual(logged.indoorTemp, 22.5); // From device.externalTemperature
+        assert.strictEqual(logged.indoorTemp, 22.5); // From device.roomCurrentTemp
         assert.strictEqual(logged.outdoorTemp, 5); // From mock weather client
         assert.strictEqual(logged.hvacState, 'STANDBY'); // From mock state machine
         assert.strictEqual(logged.seasonMode, 'winter'); // From mock predictive controller

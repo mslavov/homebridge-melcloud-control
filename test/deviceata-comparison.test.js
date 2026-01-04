@@ -83,8 +83,8 @@ describe('DeviceAta Integration Tests', () => {
             assert.strictEqual(state.operationMode, 3); // COOL
             assert.strictEqual(state.currentOperationMode, 3); // COOLING (room > set)
             assert.strictEqual(state.targetOperationMode, 2); // COOL target
-            assert.strictEqual(state.roomTemperature, 26.5);
-            assert.strictEqual(state.setTemperature, 24);
+            assert.strictEqual(state.roomCurrentTemp, 26.5);
+            assert.strictEqual(state.acSetpoint, 24);
             assert.strictEqual(state.setFanSpeed, 3);
         });
 

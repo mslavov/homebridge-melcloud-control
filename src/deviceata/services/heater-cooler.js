@@ -87,7 +87,7 @@ export class HeaterCoolerService {
 
         // Current temperature
         service.getCharacteristic(Characteristic.CurrentTemperature)
-            .onGet(async () => d.accessoryState.roomTemperature);
+            .onGet(async () => d.accessoryState.roomCurrentTemp);
 
         // Fan speed
         if (state.supportsFanSpeed) {
@@ -152,7 +152,7 @@ export class HeaterCoolerService {
                     return d.userTargetTemperature;
                 }
                 const s = d.accessoryState;
-                return s.operationMode === 8 ? s.defaultCoolingSetTemperature : s.setTemperature;
+                return s.operationMode === 8 ? s.defaultCoolingSetTemperature : s.acSetpoint;
             })
             .onSet(async (value) => {
                 try {
@@ -196,7 +196,7 @@ export class HeaterCoolerService {
                         return d.userTargetTemperature;
                     }
                     const s = d.accessoryState;
-                    return s.operationMode === 8 ? s.defaultHeatingSetTemperature : s.setTemperature;
+                    return s.operationMode === 8 ? s.defaultHeatingSetTemperature : s.acSetpoint;
                 })
                 .onSet(async (value) => {
                     try {

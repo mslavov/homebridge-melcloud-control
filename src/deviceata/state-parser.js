@@ -40,14 +40,12 @@ export class StateParser {
         // Device state
         const power = deviceData.Device.Power ?? false;
         const inStandbyMode = deviceData.Device.InStandbyMode;
-        const acRoomTemperature = deviceData.Device.RoomTemperature;
+        const acCurrentTemp = deviceData.Device.RoomTemperature;
 
-        // Use external sensor temperature if available
-        const roomTemperature = (d.externalSensorEnabled && d.externalTemperature !== null)
-            ? d.externalTemperature
-            : acRoomTemperature;
+        // Use external sensor temperature if available, fallback to AC sensor
+        const roomCurrentTemp = d.roomCurrentTemp !== null ? d.roomCurrentTemp : acCurrentTemp;
 
-        const setTemperature = deviceData.Device.SetTemperature;
+        const acSetpoint = deviceData.Device.SetTemperature;
         const defaultHeatingSetTemperature = deviceData.Device.DefaultHeatingSetTemperature;
         const defaultCoolingSetTemperature = deviceData.Device.DefaultCoolingSetTemperature;
         const actualFanSpeed = deviceData.Device.ActualFanSpeed;
@@ -87,9 +85,9 @@ export class StateParser {
             operationMode,
             currentOperationMode: 0,
             targetOperationMode: 0,
-            roomTemperature,
-            acRoomTemperature,
-            setTemperature,
+            roomCurrentTemp,
+            acCurrentTemp,
+            acSetpoint,
             defaultHeatingSetTemperature,
             defaultCoolingSetTemperature,
             actualFanSpeed,
@@ -105,7 +103,7 @@ export class StateParser {
         };
 
         // Parse operation modes for HeaterCooler
-        this.parseOperationModes(state, roomTemperature, setTemperature, operationMode, power, inStandbyMode);
+        this.parseOperationModes(state, roomCurrentTemp, acSetpoint, operationMode, power, inStandbyMode);
 
         // Build characteristics for main service update
         state.characteristics = this.buildCharacteristics(state, Characteristic);
@@ -113,7 +111,7 @@ export class StateParser {
         return state;
     }
 
-    parseOperationModes(state, roomTemperature, setTemperature, operationMode, power, inStandbyMode) {
+    parseOperationModes(state, roomCurrentTemp, acSetpoint, operationMode, power, inStandbyMode) {
         const d = this.device;
         const operationModeValidValues = [];
 
@@ -124,7 +122,7 @@ export class StateParser {
 
         switch (operationMode) {
             case 1: // HEAT
-                state.currentOperationMode = roomTemperature > setTemperature ? 1 : 2;
+                state.currentOperationMode = roomCurrentTemp > acSetpoint ? 1 : 2;
                 state.targetOperationMode = 1;
                 break;
             case 2: // DRY
@@ -132,7 +130,7 @@ export class StateParser {
                 state.targetOperationMode = resolveTargetHeaterCooler(2);
                 break;
             case 3: // COOL
-                state.currentOperationMode = roomTemperature < setTemperature ? 1 : 3;
+                state.currentOperationMode = roomCurrentTemp < acSetpoint ? 1 : 3;
                 state.targetOperationMode = 2;
                 break;
             case 7: // FAN
@@ -140,11 +138,11 @@ export class StateParser {
                 state.targetOperationMode = resolveTargetHeaterCooler(3);
                 break;
             case 8: // AUTO
-                state.currentOperationMode = roomTemperature > setTemperature ? 3 : roomTemperature < setTemperature ? 2 : 1;
+                state.currentOperationMode = roomCurrentTemp > acSetpoint ? 3 : roomCurrentTemp < acSetpoint ? 2 : 1;
                 state.targetOperationMode = 0;
                 break;
             case 9: // ISEE HEAT
-                state.currentOperationMode = roomTemperature > setTemperature ? 1 : 2;
+                state.currentOperationMode = roomCurrentTemp > acSetpoint ? 1 : 2;
                 state.targetOperationMode = 1;
                 break;
             case 10: // ISEE DRY
@@ -152,7 +150,7 @@ export class StateParser {
                 state.targetOperationMode = resolveTargetHeaterCooler(2);
                 break;
             case 11: // ISEE COOL
-                state.currentOperationMode = roomTemperature < setTemperature ? 1 : 3;
+                state.currentOperationMode = roomCurrentTemp < acSetpoint ? 1 : 3;
                 state.targetOperationMode = 2;
                 break;
             default:
@@ -184,16 +182,14 @@ export class StateParser {
         const d = this.device;
         const characteristics = [];
 
-        // Get display temperature (user target if external sensor, else set temperature)
-        const displayTemp = d.externalSensorEnabled && d.userTargetTemperature !== null
-            ? d.userTargetTemperature
-            : state.setTemperature;
+        // Get display temperature (user target if set, else AC setpoint)
+        const displayTemp = d.userTargetTemperature !== null ? d.userTargetTemperature : state.acSetpoint;
 
         characteristics.push(
             { type: Characteristic.Active, value: state.power },
             { type: Characteristic.CurrentHeaterCoolerState, value: state.currentOperationMode },
             { type: Characteristic.TargetHeaterCoolerState, value: state.targetOperationMode },
-            { type: Characteristic.CurrentTemperature, value: state.roomTemperature },
+            { type: Characteristic.CurrentTemperature, value: state.roomCurrentTemp },
             { type: Characteristic.LockPhysicalControls, value: state.lockPhysicalControl },
             { type: Characteristic.TemperatureDisplayUnits, value: state.useFahrenheit },
             { type: Characteristic.CoolingThresholdTemperature, value: state.operationMode === 8 ? state.defaultCoolingSetTemperature : displayTemp }

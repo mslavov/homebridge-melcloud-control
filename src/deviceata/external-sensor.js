@@ -13,7 +13,7 @@ export class ExternalSensor {
     async init() {
         const d = this.device;
 
-        if (d.externalSensorEnabled && d.externalSensorType === 'shelly') {
+        if (d.externalSensorType === 'shelly') {
             try {
                 d.shellyClient = new ShellyCloud({
                     shellyServerUri: d.externalSensorConfig.shellyServerUri,
@@ -23,7 +23,7 @@ export class ExternalSensor {
                     logWarn: d.logWarn
                 })
                     .on('temperature', (temp, humidity) => {
-                        d.externalTemperature = temp;
+                        d.roomCurrentTemp = temp;
                         d.externalHumidity = humidity;
                         this.updateTemperatureOffset();
                         if (d.logDebug) d.emit('debug', `External sensor: ${temp}°C, humidity: ${humidity}%`);
@@ -53,18 +53,18 @@ export class ExternalSensor {
     async updateTemperatureOffset() {
         const d = this.device;
 
-        if (!d.externalSensorEnabled || d.externalTemperature === null) {
+        if (d.roomCurrentTemp === null) {
             d.temperatureOffset = 0;
             return;
         }
 
-        const acRoomTemp = d.deviceData?.Device?.RoomTemperature;
-        if (acRoomTemp === null || acRoomTemp === undefined) {
+        const acCurrentTemp = d.deviceData?.Device?.RoomTemperature;
+        if (acCurrentTemp === null || acCurrentTemp === undefined) {
             return;
         }
 
         // Calculate offset: positive means AC reads higher than external
-        const newOffset = acRoomTemp - d.externalTemperature;
+        const newOffset = acCurrentTemp - d.roomCurrentTemp;
         const offsetChanged = Math.abs(newOffset - d.temperatureOffset) > 0.3;
 
         // Update offset
@@ -72,7 +72,7 @@ export class ExternalSensor {
 
         // Log if offset changed significantly
         if (offsetChanged && d.logInfo) {
-            d.emit('info', `Temperature offset: ${d.temperatureOffset.toFixed(1)}°C (AC: ${acRoomTemp}°C, External: ${d.externalTemperature}°C)`);
+            d.emit('info', `Temperature offset: ${d.temperatureOffset.toFixed(1)}°C (AC: ${acCurrentTemp}°C, Room: ${d.roomCurrentTemp}°C)`);
         }
 
         // Reapply compensation if offset changed and we have a user target
@@ -84,7 +84,7 @@ export class ExternalSensor {
     async reapplyCompensation() {
         const d = this.device;
 
-        if (!d.compensationEnabled || !d.externalSensorEnabled || d.userTargetTemperature === null) {
+        if (!d.compensationEnabled || d.userTargetTemperature === null) {
             return;
         }
 
@@ -115,11 +115,11 @@ export class ExternalSensor {
     getCompensatedTargetTemperature(userTarget) {
         const d = this.device;
 
-        if (!d.compensationEnabled || !d.externalSensorEnabled) {
+        if (!d.compensationEnabled) {
             return userTarget;
         }
 
-        if (d.externalTemperature === null || Math.abs(d.temperatureOffset) < d.hysteresis) {
+        if (d.roomCurrentTemp === null || Math.abs(d.temperatureOffset) < d.hysteresis) {
             return userTarget;
         }
 

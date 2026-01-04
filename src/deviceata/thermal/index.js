@@ -112,7 +112,7 @@ class ThermalManager extends EventEmitter {
             timestamp: new Date(),
 
             // Indoor temperature from external sensor
-            indoorTemp: device.externalTemperature,
+            indoorTemp: device.roomCurrentTemp,
 
             // AC sensor temperature (recuperator temp)
             recuperatorTemp: deviceData?.Device?.RoomTemperature,

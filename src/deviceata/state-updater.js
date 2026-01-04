@@ -31,8 +31,8 @@ export class StateUpdater {
         d.emit('info', `Power: ${state.power ? 'On' : 'Off'}`);
         d.emit('info', `Target operation mode: ${AirConditioner.OperationModeMapEnumToString[state.operationMode]}`);
         d.emit('info', `Current operation mode: ${AirConditioner.CurrentOperationModeMapEnumToStringHeatherCooler[state.currentOperationMode]}`);
-        d.emit('info', `Target temperature: ${state.setTemperature}${state.temperatureUnit}`);
-        d.emit('info', `Current temperature: ${state.roomTemperature}${state.temperatureUnit}`);
+        d.emit('info', `Target temperature: ${state.acSetpoint}${state.temperatureUnit}`);
+        d.emit('info', `Current temperature: ${state.roomCurrentTemp}${state.temperatureUnit}`);
 
         if (state.supportsFanSpeed) {
             d.emit('info', `Target fan speed: ${AirConditioner.FanSpeedMapEnumToString[state.setFanSpeed]}`);

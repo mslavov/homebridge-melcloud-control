@@ -15,7 +15,7 @@ function createMockDevice(overrides = {}) {
     return {
         targetTemperature: 23,
         location: { latitude: 42.7, longitude: 23.3 },
-        externalTemperature: 22.5,
+        roomCurrentTemp: 22.5,
         logDebug: false,
         logInfo: false,
         logWarn: false,

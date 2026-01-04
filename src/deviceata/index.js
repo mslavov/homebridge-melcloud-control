@@ -44,7 +44,6 @@ class DeviceAta extends EventEmitter {
 
         // External sensor config (required for predictive control)
         this.externalSensorConfig = device.externalSensor || {};
-        this.externalSensorEnabled = true; // Always enabled in predictive mode
         this.externalSensorType = this.externalSensorConfig.type || 'shelly';
         this.compensationEnabled = true; // Always enabled in predictive mode
         this.hysteresis = 0.5;
@@ -59,7 +58,7 @@ class DeviceAta extends EventEmitter {
         this.influxEnabled = this.influxConfig.enabled || false;
 
         // External sensor state
-        this.externalTemperature = null;
+        this.roomCurrentTemp = null;
         this.externalHumidity = null;
         this.temperatureOffset = 0;
         this.userTargetTemperature = null;
@@ -130,18 +129,18 @@ class DeviceAta extends EventEmitter {
                     this.accessoryState = this.stateParser.parse(deviceData);
 
                     // Update external sensor offset
-                    if (this.externalSensorEnabled && this.externalTemperature !== null) {
-                        const acRoomTemp = deviceData?.Device?.RoomTemperature;
-                        if (acRoomTemp !== null && acRoomTemp !== undefined) {
-                            this.temperatureOffset = acRoomTemp - this.externalTemperature;
+                    if (this.roomCurrentTemp !== null) {
+                        const acCurrentTemp = deviceData?.Device?.RoomTemperature;
+                        if (acCurrentTemp !== null && acCurrentTemp !== undefined) {
+                            this.temperatureOffset = acCurrentTemp - this.roomCurrentTemp;
                         }
                     }
 
                     // Initialize user target from current AC setting if not set
-                    const setTemperature = deviceData.Device.SetTemperature;
-                    if (this.externalSensorEnabled && this.userTargetTemperature === null && setTemperature !== null) {
-                        this.userTargetTemperature = setTemperature;
-                        if (this.logDebug) this.emit('debug', `Initialized user target temperature: ${setTemperature}°C`);
+                    const acSetpoint = deviceData.Device.SetTemperature;
+                    if (this.userTargetTemperature === null && acSetpoint !== null) {
+                        this.userTargetTemperature = acSetpoint;
+                        if (this.logDebug) this.emit('debug', `Initialized user target temperature: ${acSetpoint}°C`);
                     }
 
                     // Update all services
