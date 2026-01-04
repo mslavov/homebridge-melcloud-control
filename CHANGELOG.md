@@ -15,16 +15,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - [Predictive Control](docs/predictive-control.md) - The 4-layer algorithm explained
   - [State Machine](docs/state-machine.md) - 8 HVAC states and transitions
   - [Configuration](docs/configuration.md) - Complete configuration reference
+- **GitHub Actions Workflow**: Automated npm publishing with trusted publishing (OIDC)
+- **Cold Snap Detection**: Algorithm detects approaching cold weather and pre-heats
+- **Heatwave Detection**: Algorithm detects approaching hot weather and pre-cools
 
 ### Fixed
 
 - **Critical: Setpoint not applied to AC** - State machine now reapplies setpoint when staying in same state
 - **Initialization bug** - User target temperature now initialized from config (not stale AC value)
-- **HomeKit threshold warnings** - Reduced comfort band to stay within HomeKit's valid range (20-30°C)
-- **Minimum heating setpoint** - Algorithm now clamps to max 2°C below user target to prevent under-heating
+- **HomeKit threshold warnings** - Clamped threshold temperatures to HomeKit's valid range (20-30°C)
+- **Over-aggressive adjustments** - Algorithm now limits deviation to ±2°C from user comfort target
 
 ### Changed
 
+- Renamed internal variables for clarity (`userTarget` → `userComfortTarget`, `setpoint` → `predictedRoomTarget`)
+- Removed unused `externalSensorEnabled` flag (sensor is always required)
 - Improved logging for prediction calculations and state machine decisions
 - ActionExecutor now logs setpoint changes with before/after values
 
