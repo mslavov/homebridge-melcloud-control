@@ -33,7 +33,8 @@ Version bump type: $ARGUMENTS (default: patch)
    - Follow existing changelog format
 
 4. **Commit and tag**
-   - `git add package.json CHANGELOG.md`
+   - `git add package.json package-lock.json CHANGELOG.md`
+   - Verify with `git status` that all version-related files are staged
    - `git commit -m "chore: release vX.Y.Z"`
    - `git tag vX.Y.Z`
 
@@ -72,5 +73,8 @@ Before this workflow can publish, configure trusted publishing on npmjs.com:
 ### Error Handling
 
 - If GitHub Actions fails: Check the workflow logs for errors
-- If publish fails with 404: Trusted publisher not configured (see setup above)
+- If publish fails with 404:
+  - Trusted publisher may not be configured (see setup above)
+  - npm CLI version may be too old (requires 11.5.1+ for OIDC). The workflow includes `npm install -g npm@latest` to fix this.
 - If tests fail: Fix tests before the publish can succeed
+- If "Access token expired": This usually means npm version is too old for OIDC
