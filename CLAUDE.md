@@ -11,6 +11,36 @@ This is a Homebridge plugin (`homebridge-melcloud-passive-house`) for **passive 
 - **State machine control** with anti-oscillation protection
 - **Thermal learning** (optional) via InfluxDB for building parameter calibration
 
+## Documentation
+
+Comprehensive documentation is available in the `docs/` folder:
+
+- **[Terminology](docs/terminology.md)** - Glossary of all temperature terms and concepts
+- **[Architecture](docs/architecture.md)** - System overview and component diagram
+- **[Predictive Control](docs/predictive-control.md)** - The 4-layer prediction algorithm
+- **[State Machine](docs/state-machine.md)** - 8 HVAC states and transitions
+- **[Configuration](docs/configuration.md)** - All config options explained
+
+## Terminology Quick Reference
+
+Use these terms consistently in code, logs, and discussions:
+
+| Term | Description | Variable |
+|------|-------------|----------|
+| **AC Sensor Temp** | AC's internal sensor (unreliable) | `acCurrentTemp` |
+| **AC Setpoint** | Temperature sent to AC | `acSetpoint` |
+| **Room Temperature** | From Shelly sensor (truth) | `roomCurrentTemp` |
+| **User Comfort Target** | User's desired temp (HomeKit) | `userTargetTemperature` |
+| **Base Target Temp** | Config midpoint (default 23°C) | `targetTemperature` |
+| **Predicted Room Target** | Algorithm's calculated target | `predictedSetpoint` |
+| **Sensor Offset** | AC sensor minus room temp | `temperatureOffset` |
+
+**Key insight**: HomeKit shows absolute temperatures, but we interpret them as relative to the base target. A user setting of 24°C means "+1°C warmer" if base is 23°C.
+
+**Temperature flow**: User Target → Predictive Algorithm → Predicted Room Target → + Sensor Offset → Compensated AC Setpoint → AC
+
+See [docs/terminology.md](docs/terminology.md) for complete definitions and diagrams.
+
 ## Development Commands
 
 No build step is required - this is a pure ES Modules JavaScript project that runs directly on Node.js.

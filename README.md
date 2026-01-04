@@ -182,6 +182,16 @@ When InfluxDB is enabled, the plugin:
 
 Estimated storage: ~100 MB per device with 30-day retention.
 
+## Documentation
+
+Detailed documentation is available in the [`docs/`](docs/) folder:
+
+- **[Terminology](docs/terminology.md)** - Glossary of temperature terms and concepts
+- **[Architecture](docs/architecture.md)** - System overview and component diagram
+- **[Predictive Control](docs/predictive-control.md)** - The 4-layer prediction algorithm explained
+- **[State Machine](docs/state-machine.md)** - 8 HVAC states and transition logic
+- **[Configuration](docs/configuration.md)** - Complete configuration reference
+
 ## Credits
 
 Based on [homebridge-melcloud-control](https://github.com/grzegorz914/homebridge-melcloud-control) by grzegorz914.

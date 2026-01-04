@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - (04.01.2026)
+
+### Added
+
+- **Comprehensive Documentation**: New `docs/` folder with detailed guides
+  - [Terminology](docs/terminology.md) - Glossary of temperature terms and concepts
+  - [Architecture](docs/architecture.md) - System overview and component diagram
+  - [Predictive Control](docs/predictive-control.md) - The 4-layer algorithm explained
+  - [State Machine](docs/state-machine.md) - 8 HVAC states and transitions
+  - [Configuration](docs/configuration.md) - Complete configuration reference
+
+### Fixed
+
+- **Critical: Setpoint not applied to AC** - State machine now reapplies setpoint when staying in same state
+- **Initialization bug** - User target temperature now initialized from config (not stale AC value)
+- **HomeKit threshold warnings** - Reduced comfort band to stay within HomeKit's valid range (20-30°C)
+- **Minimum heating setpoint** - Algorithm now clamps to max 2°C below user target to prevent under-heating
+
+### Changed
+
+- Improved logging for prediction calculations and state machine decisions
+- ActionExecutor now logs setpoint changes with before/after values
+
 ## [1.1.0] - (01.01.2026)
 
 ### Added
