@@ -32,7 +32,7 @@ export const AntiOscillation = {
 
 // Predictive algorithm parameters
 export const PredictiveDefaults = {
-    COMFORT_BAND: 3,                    // ±3°C from target temperature
+    COMFORT_BAND: 2,                    // ±2°C from target temperature (HomeKit requires min 20°C)
     DEFAULT_TARGET_TEMP: 23,            // Default target temperature in °C
     BUILDING_TIME_CONSTANT: 18,         // Default tau in hours (passive house)
     OUTDOOR_RESET_SLOPE: 0.4,           // Outdoor reset curve slope

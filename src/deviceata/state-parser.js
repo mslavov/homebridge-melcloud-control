@@ -183,7 +183,20 @@ export class StateParser {
         const characteristics = [];
 
         // Get display temperature (user target if set, else AC setpoint)
-        const displayTemp = d.userTargetTemperature !== null ? d.userTargetTemperature : state.acSetpoint;
+        let displayTemp = d.userTargetTemperature !== null ? d.userTargetTemperature : state.acSetpoint;
+
+        // Clamp to HomeKit valid range (10-38°C for threshold temps, but 20-30 is typical)
+        // HomeKit HeaterCooler threshold temps have stricter limits depending on setup
+        const minThreshold = 20;
+        const maxThreshold = 30;
+        displayTemp = Math.max(minThreshold, Math.min(maxThreshold, displayTemp));
+
+        const coolingTemp = state.operationMode === 8
+            ? Math.max(minThreshold, Math.min(maxThreshold, state.defaultCoolingSetTemperature))
+            : displayTemp;
+        const heatingTemp = state.operationMode === 8
+            ? Math.max(minThreshold, Math.min(maxThreshold, state.defaultHeatingSetTemperature))
+            : displayTemp;
 
         characteristics.push(
             { type: Characteristic.Active, value: state.power },
@@ -192,11 +205,11 @@ export class StateParser {
             { type: Characteristic.CurrentTemperature, value: state.roomCurrentTemp },
             { type: Characteristic.LockPhysicalControls, value: state.lockPhysicalControl },
             { type: Characteristic.TemperatureDisplayUnits, value: state.useFahrenheit },
-            { type: Characteristic.CoolingThresholdTemperature, value: state.operationMode === 8 ? state.defaultCoolingSetTemperature : displayTemp }
+            { type: Characteristic.CoolingThresholdTemperature, value: coolingTemp }
         );
 
         if (state.supportsHeat) {
-            characteristics.push({ type: Characteristic.HeatingThresholdTemperature, value: state.operationMode === 8 ? state.defaultHeatingSetTemperature : displayTemp });
+            characteristics.push({ type: Characteristic.HeatingThresholdTemperature, value: heatingTemp });
         }
         if (state.supportsFanSpeed) {
             characteristics.push({ type: Characteristic.RotationSpeed, value: state.currentFanSpeed });

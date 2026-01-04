@@ -27,6 +27,9 @@ class StateMachine extends EventEmitter {
             lastModeSwitch: null
         };
 
+        // Track last sent setpoint to detect when reapplication is needed
+        this.lastSentSetpoint = null;
+
         // Configuration (can be overridden)
         this.config = {
             deadband: AntiOscillation.DEADBAND,
@@ -92,6 +95,11 @@ class StateMachine extends EventEmitter {
         const deviation = currentTemp - targetTemp;
         const halfDeadband = this.config.deadband / 2;
 
+        // Log state machine status for debugging
+        if (this.device.logDebug) {
+            this.device.emit('debug', `StateMachine: state=${this.currentState}, indoor=${currentTemp?.toFixed(1)}°C, target=${targetTemp}°C, deviation=${deviation.toFixed(1)}°C, setpoint=${predictedSetpoint}°C`);
+        }
+
         // Determine desired state based on temperature and mode
         let desiredState = this._determineDesiredState(
             deviation,
@@ -119,7 +127,23 @@ class StateMachine extends EventEmitter {
             });
         }
 
-        // No state change needed
+        // No state change needed - but check if setpoint needs reapplication
+        // When in an active state, we should update the setpoint if it changed significantly
+        if (this._isActiveState() || this.currentState === States.HEATING_COAST || this.currentState === States.COOLING_COAST) {
+            const setpointChanged = this.lastSentSetpoint === null ||
+                Math.abs(predictedSetpoint - this.lastSentSetpoint) > 0.5;
+
+            if (setpointChanged) {
+                const oldSetpoint = this.lastSentSetpoint;
+                this.lastSentSetpoint = predictedSetpoint;
+                return {
+                    state: this.currentState,
+                    action: { type: 'coast', setpoint: predictedSetpoint },
+                    reason: `Maintaining state, setpoint update: ${oldSetpoint?.toFixed(1) || 'initial'}°C → ${predictedSetpoint}°C`
+                };
+            }
+        }
+
         return {
             state: this.currentState,
             action: null,
@@ -226,6 +250,11 @@ class StateMachine extends EventEmitter {
         if ((this._isHeatingState(oldState) && this._isCoolingState(newState)) ||
             (this._isCoolingState(oldState) && this._isHeatingState(newState))) {
             this.timers.lastModeSwitch = now;
+        }
+
+        // Track setpoint from action if present
+        if (result.action?.setpoint !== undefined) {
+            this.lastSentSetpoint = result.action.setpoint;
         }
 
         // Update state
@@ -409,6 +438,7 @@ class StateMachine extends EventEmitter {
             lastOffTime: null,
             lastModeSwitch: null
         };
+        this.lastSentSetpoint = null;
     }
 }
 

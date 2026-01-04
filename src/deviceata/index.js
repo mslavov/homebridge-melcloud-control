@@ -136,11 +136,11 @@ class DeviceAta extends EventEmitter {
                         }
                     }
 
-                    // Initialize user target from current AC setting if not set
-                    const acSetpoint = deviceData.Device.SetTemperature;
-                    if (this.userTargetTemperature === null && acSetpoint !== null) {
-                        this.userTargetTemperature = acSetpoint;
-                        if (this.logDebug) this.emit('debug', `Initialized user target temperature: ${acSetpoint}°C`);
+                    // Initialize user target from config target, NOT from AC's current setpoint
+                    // The AC setpoint may be stale/wrong from previous manual adjustment
+                    if (this.userTargetTemperature === null) {
+                        this.userTargetTemperature = this.targetTemperature;
+                        if (this.logInfo) this.emit('info', `User target temperature initialized to config value: ${this.targetTemperature}°C`);
                     }
 
                     // Update all services

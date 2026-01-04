@@ -11,6 +11,8 @@ class ActionExecutor {
         this.device = device;
         this.lastActionTime = null;
         this.minActionInterval = 60000; // 60 seconds minimum between actions
+        this.lastSentSetpoint = null;
+        this.lastSentMode = null;
     }
 
     /**
@@ -60,7 +62,11 @@ class ActionExecutor {
         d.deviceData.Device.OperationMode = mode;
         d.deviceData.Device.SetTemperature = setpoint;
 
-        d.emit('info', `Auto: Power ON, ${action.mode}, ${action.setpoint}°C (compensated: ${setpoint}°C)`);
+        // Track what we sent
+        this.lastSentSetpoint = setpoint;
+        this.lastSentMode = action.mode;
+
+        d.emit('info', `Auto: Power ON, ${action.mode}, target=${action.setpoint}°C → AC setpoint=${setpoint}°C`);
 
         // Use combined flag for efficiency
         await d.melCloudAta.send(
@@ -69,6 +75,10 @@ class ActionExecutor {
             d.deviceData,
             AirConditioner.EffectiveFlags.PowerOperationModeSetTemperature
         );
+
+        if (d.logDebug) {
+            d.emit('debug', `ActionExecutor: Sent Power=ON, Mode=${mode}, SetTemp=${setpoint}°C to MELCloud`);
+        }
     }
 
     /**
@@ -80,7 +90,10 @@ class ActionExecutor {
 
         d.deviceData.Device.SetTemperature = setpoint;
 
-        d.emit('info', `Auto: Coast to ${action.setpoint}°C (compensated: ${setpoint}°C)`);
+        // Track what we sent
+        this.lastSentSetpoint = setpoint;
+
+        d.emit('info', `Auto: Setpoint update, target=${action.setpoint}°C → AC setpoint=${setpoint}°C`);
 
         await d.melCloudAta.send(
             d.accountType,
@@ -88,6 +101,10 @@ class ActionExecutor {
             d.deviceData,
             AirConditioner.EffectiveFlags.SetTemperature
         );
+
+        if (d.logDebug) {
+            d.emit('debug', `ActionExecutor: Sent SetTemp=${setpoint}°C to MELCloud`);
+        }
     }
 }
 

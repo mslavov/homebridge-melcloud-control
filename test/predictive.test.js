@@ -39,7 +39,7 @@ describe('SetpointCalculator', () => {
     describe('Basic Setpoint Calculation', () => {
         test('returns user target as base setpoint when no adjustments needed', () => {
             const result = calculator.calculateSetpoint({
-                userTarget: 23,
+                userComfortTarget: 23,
                 currentIndoorTemp: 23,
                 currentOutdoorTemp: 10, // Design outdoor temp for winter
                 forecastTemps: [],
@@ -47,13 +47,13 @@ describe('SetpointCalculator', () => {
                 seasonMode: SeasonMode.WINTER
             });
 
-            assert.ok(result.setpoint >= 22 && result.setpoint <= 24);
+            assert.ok(result.predictedRoomTarget >= 22 && result.predictedRoomTarget <= 24);
             assert.strictEqual(result.components.base, 23);
         });
 
         test('rounds setpoint to 0.5°C steps', () => {
             const result = calculator.calculateSetpoint({
-                userTarget: 23.3,
+                userComfortTarget: 23.3,
                 currentIndoorTemp: 23,
                 currentOutdoorTemp: 10,
                 forecastTemps: [],
@@ -62,38 +62,38 @@ describe('SetpointCalculator', () => {
             });
 
             // Should be rounded to nearest 0.5
-            assert.strictEqual(result.setpoint % 0.5, 0);
+            assert.strictEqual(result.predictedRoomTarget % 0.5, 0);
         });
 
         test('clamps setpoint to valid range (16-30°C)', () => {
             // Test lower bound
             const lowResult = calculator.calculateSetpoint({
-                userTarget: 14, // Below minimum
+                userComfortTarget: 14, // Below minimum
                 currentIndoorTemp: 14,
                 currentOutdoorTemp: -20, // Very cold
                 forecastTemps: [],
                 forecastSolar: [],
                 seasonMode: SeasonMode.WINTER
             });
-            assert.ok(lowResult.setpoint >= 16);
+            assert.ok(lowResult.predictedRoomTarget >= 16);
 
             // Test upper bound
             const highResult = calculator.calculateSetpoint({
-                userTarget: 35, // Above maximum
+                userComfortTarget: 35, // Above maximum
                 currentIndoorTemp: 35,
                 currentOutdoorTemp: 40, // Very hot
                 forecastTemps: [],
                 forecastSolar: [],
                 seasonMode: SeasonMode.SUMMER
             });
-            assert.ok(highResult.setpoint <= 30);
+            assert.ok(highResult.predictedRoomTarget <= 30);
         });
     });
 
     describe('Outdoor Reset Curve', () => {
         test('increases setpoint when outdoor temp drops below design (winter)', () => {
             const result = calculator.calculateSetpoint({
-                userTarget: 23,
+                userComfortTarget: 23,
                 currentIndoorTemp: 23,
                 currentOutdoorTemp: 0, // 10°C below design outdoor temp
                 forecastTemps: [],
@@ -107,7 +107,7 @@ describe('SetpointCalculator', () => {
 
         test('decreases setpoint when outdoor temp rises above design (winter)', () => {
             const result = calculator.calculateSetpoint({
-                userTarget: 23,
+                userComfortTarget: 23,
                 currentIndoorTemp: 23,
                 currentOutdoorTemp: 20, // Above design outdoor temp
                 forecastTemps: [],
@@ -121,7 +121,7 @@ describe('SetpointCalculator', () => {
 
         test('limits outdoor reset adjustment to ±2°C', () => {
             const result = calculator.calculateSetpoint({
-                userTarget: 23,
+                userComfortTarget: 23,
                 currentIndoorTemp: 23,
                 currentOutdoorTemp: -30, // Extremely cold
                 forecastTemps: [],
@@ -138,7 +138,7 @@ describe('SetpointCalculator', () => {
         test('adjusts setpoint based on forecast temps', () => {
             const coldForecast = Array(24).fill(-5); // Getting colder
             const result = calculator.calculateSetpoint({
-                userTarget: 23,
+                userComfortTarget: 23,
                 currentIndoorTemp: 23,
                 currentOutdoorTemp: 5,
                 forecastTemps: coldForecast,
@@ -152,7 +152,7 @@ describe('SetpointCalculator', () => {
 
         test('ignores empty forecast', () => {
             const result = calculator.calculateSetpoint({
-                userTarget: 23,
+                userComfortTarget: 23,
                 currentIndoorTemp: 23,
                 currentOutdoorTemp: 10,
                 forecastTemps: [],
@@ -168,7 +168,7 @@ describe('SetpointCalculator', () => {
         test('reduces heating setpoint when solar radiation expected (winter)', () => {
             const highSolar = Array(6).fill(400); // High solar radiation
             const result = calculator.calculateSetpoint({
-                userTarget: 23,
+                userComfortTarget: 23,
                 currentIndoorTemp: 23,
                 currentOutdoorTemp: 5,
                 forecastTemps: [],
@@ -183,7 +183,7 @@ describe('SetpointCalculator', () => {
         test('does not apply solar offset in summer mode', () => {
             const highSolar = Array(6).fill(400);
             const result = calculator.calculateSetpoint({
-                userTarget: 25,
+                userComfortTarget: 25,
                 currentIndoorTemp: 25,
                 currentOutdoorTemp: 30,
                 forecastTemps: [],
@@ -198,7 +198,7 @@ describe('SetpointCalculator', () => {
         test('no solar offset when radiation below threshold', () => {
             const lowSolar = Array(6).fill(100); // Below threshold
             const result = calculator.calculateSetpoint({
-                userTarget: 23,
+                userComfortTarget: 23,
                 currentIndoorTemp: 23,
                 currentOutdoorTemp: 5,
                 forecastTemps: [],
@@ -213,7 +213,7 @@ describe('SetpointCalculator', () => {
     describe('Error Correction', () => {
         test('applies positive correction when below target', () => {
             const result = calculator.calculateSetpoint({
-                userTarget: 23,
+                userComfortTarget: 23,
                 currentIndoorTemp: 21, // 2°C below target
                 currentOutdoorTemp: 10,
                 forecastTemps: [],
@@ -226,7 +226,7 @@ describe('SetpointCalculator', () => {
 
         test('applies negative correction when above target', () => {
             const result = calculator.calculateSetpoint({
-                userTarget: 23,
+                userComfortTarget: 23,
                 currentIndoorTemp: 25, // 2°C above target
                 currentOutdoorTemp: 10,
                 forecastTemps: [],
@@ -239,7 +239,7 @@ describe('SetpointCalculator', () => {
 
         test('limits error correction to ±1°C', () => {
             const result = calculator.calculateSetpoint({
-                userTarget: 23,
+                userComfortTarget: 23,
                 currentIndoorTemp: 18, // 5°C below target
                 currentOutdoorTemp: 10,
                 forecastTemps: [],
@@ -413,8 +413,9 @@ describe('StateMachine', () => {
             assert.strictEqual(stateMachine.getCurrentState(), States.HEATING_ACTIVE);
 
             // Try to stop immediately (blocked)
+            // Use temp 26°C to exceed halfDeadband (2.0) and trigger a transition attempt
             const result = stateMachine.processUpdate({
-                currentTemp: 25, // Above comfort band
+                currentTemp: 26, // Deviation > halfDeadband triggers transition attempt
                 targetTemp: 23,
                 predictedSetpoint: 23,
                 seasonMode: SeasonMode.WINTER,

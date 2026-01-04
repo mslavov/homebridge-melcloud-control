@@ -36,20 +36,20 @@ class SetpointCalculator {
     }
 
     /**
-     * Calculate the predictive setpoint
+     * Calculate the predicted room target temperature
      *
      * @param {Object} params
-     * @param {number} params.userTarget - User's desired temperature
+     * @param {number} params.userComfortTarget - User's comfort preference (absolute temperature)
      * @param {number} params.currentIndoorTemp - Current room temperature (from external sensor)
      * @param {number} params.currentOutdoorTemp - Current outdoor temperature
      * @param {number[]} params.forecastTemps - Array of forecast temperatures (hourly)
      * @param {number[]} params.forecastSolar - Array of forecast solar radiation (hourly)
      * @param {string} params.seasonMode - 'winter' or 'summer'
-     * @returns {Object} { setpoint, components, reason }
+     * @returns {Object} { predictedRoomTarget, components, reason }
      */
     calculateSetpoint(params) {
         const {
-            userTarget,
+            userComfortTarget,
             currentIndoorTemp,
             currentOutdoorTemp,
             forecastTemps = [],
@@ -57,10 +57,10 @@ class SetpointCalculator {
             seasonMode = SeasonMode.WINTER
         } = params;
 
-        // Base setpoint is user's target
-        let setpoint = userTarget;
+        // Base is user's comfort preference
+        let predictedRoomTarget = userComfortTarget;
         const components = {
-            base: userTarget,
+            base: userComfortTarget,
             outdoorReset: 0,
             forecastAdjustment: 0,
             solarOffset: 0,
@@ -72,12 +72,12 @@ class SetpointCalculator {
         // For high-mass systems, use lower slope (0.3-0.5)
         if (currentOutdoorTemp !== null) {
             const outdoorReset = this._calculateOutdoorResetCurve(
-                userTarget,
+                userComfortTarget,
                 currentOutdoorTemp,
                 seasonMode
             );
             components.outdoorReset = outdoorReset;
-            setpoint += outdoorReset;
+            predictedRoomTarget += outdoorReset;
 
             if (Math.abs(outdoorReset) > 0.3) {
                 reasons.push(`Outdoor reset: ${outdoorReset > 0 ? '+' : ''}${outdoorReset.toFixed(1)}°C`);
@@ -92,7 +92,7 @@ class SetpointCalculator {
                 seasonMode
             );
             components.forecastAdjustment = forecastAdjustment;
-            setpoint += forecastAdjustment;
+            predictedRoomTarget += forecastAdjustment;
 
             if (Math.abs(forecastAdjustment) > 0.3) {
                 reasons.push(`Forecast: ${forecastAdjustment > 0 ? '+' : ''}${forecastAdjustment.toFixed(1)}°C`);
@@ -103,7 +103,7 @@ class SetpointCalculator {
         if (seasonMode === SeasonMode.WINTER && forecastSolar.length > 0) {
             const solarOffset = this._calculateSolarGainOffset(forecastSolar);
             components.solarOffset = solarOffset;
-            setpoint += solarOffset;
+            predictedRoomTarget += solarOffset;
 
             if (Math.abs(solarOffset) > 0.3) {
                 reasons.push(`Solar gain: ${solarOffset > 0 ? '+' : ''}${solarOffset.toFixed(1)}°C`);
@@ -113,23 +113,35 @@ class SetpointCalculator {
         // Layer 4: Error correction (small proportional term)
         if (currentIndoorTemp !== null) {
             const errorCorrection = this._calculateErrorCorrection(
-                userTarget,
+                userComfortTarget,
                 currentIndoorTemp
             );
             components.errorCorrection = errorCorrection;
-            setpoint += errorCorrection;
+            predictedRoomTarget += errorCorrection;
+        }
+
+        // Apply season-specific floors to prevent over-aggressive adjustments
+        // In winter, never set more than 2°C below user comfort target
+        // In summer, never set more than 2°C above user comfort target
+        const maxDeviation = 2.0;
+        if (seasonMode === SeasonMode.WINTER && predictedRoomTarget < userComfortTarget - maxDeviation) {
+            predictedRoomTarget = userComfortTarget - maxDeviation;
+            reasons.push('Clamped to min heating target');
+        } else if (seasonMode === SeasonMode.SUMMER && predictedRoomTarget > userComfortTarget + maxDeviation) {
+            predictedRoomTarget = userComfortTarget + maxDeviation;
+            reasons.push('Clamped to max cooling target');
         }
 
         // Clamp to reasonable range
-        const minSetpoint = 16;
-        const maxSetpoint = 30;
-        setpoint = Math.max(minSetpoint, Math.min(maxSetpoint, setpoint));
+        const minTarget = 16;
+        const maxTarget = 30;
+        predictedRoomTarget = Math.max(minTarget, Math.min(maxTarget, predictedRoomTarget));
 
         // Round to 0.5°C steps
-        setpoint = Math.round(setpoint * 2) / 2;
+        predictedRoomTarget = Math.round(predictedRoomTarget * 2) / 2;
 
         return {
-            setpoint,
+            predictedRoomTarget,
             components,
             reason: reasons.length > 0 ? reasons.join(', ') : 'Normal operation'
         };

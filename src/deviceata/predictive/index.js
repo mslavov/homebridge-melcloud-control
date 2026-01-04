@@ -148,11 +148,11 @@ class PredictiveController extends EventEmitter {
         const forecastTemps = this.weatherClient.getForecastTemperatures(24);
         const forecastSolar = this.weatherClient.getForecastSolarRadiation(24);
         const seasonMode = this.getSeasonMode();
-        const userTarget = this.getUserComfortPreference();
+        const userComfortTarget = this.getUserComfortPreference();
 
-        // Calculate predictive setpoint
+        // Calculate predicted room target
         const result = this.setpointCalculator.calculateSetpoint({
-            userTarget,
+            userComfortTarget,
             currentIndoorTemp,
             currentOutdoorTemp,
             forecastTemps,
@@ -160,28 +160,28 @@ class PredictiveController extends EventEmitter {
             seasonMode
         });
 
-        this.lastCalculatedSetpoint = result.setpoint;
+        this.lastCalculatedSetpoint = result.predictedRoomTarget;
         this.lastSeasonMode = seasonMode;
 
         if (this.device.logDebug) {
-            this.device.emit('debug', `PredictiveController: Calculated setpoint ${result.setpoint}°C (${result.reason})`);
+            this.device.emit('debug', `PredictiveController: Predicted room target ${result.predictedRoomTarget}°C (${result.reason})`);
         }
 
         return result;
     }
 
     /**
-     * Get the predictive setpoint for use in HeaterCooler service
+     * Get the predicted room target for use in HeaterCooler service
      * This combines the predictive calculation with external sensor compensation
      */
     getPredictiveSetpoint(userTarget) {
         // Update user preference
         this.setUserComfortPreference(userTarget);
 
-        // Calculate predictive setpoint
+        // Calculate predicted room target
         const result = this.calculateSetpoint();
 
-        return result.setpoint;
+        return result.predictedRoomTarget;
     }
 
     /**
@@ -191,32 +191,51 @@ class PredictiveController extends EventEmitter {
     processStateUpdate(deviceData) {
         // Get current temperatures
         const currentTemp = this.device.roomCurrentTemp;
-        const userTarget = this.getUserComfortPreference();
+        const userComfortTarget = this.getUserComfortPreference();
         const acPowerState = deviceData?.Device?.Power || false;
+        const acSetTemp = deviceData?.Device?.SetTemperature;
+        const acRoomTemp = deviceData?.Device?.RoomTemperature;
+        const outdoorTemp = this.weatherClient.getCurrentOutdoorTemp();
 
-        // Calculate setpoint
+        // Calculate predicted room target
         const setpointResult = this.calculateSetpoint();
+        const seasonMode = this.getSeasonMode();
+
+        // Log prediction summary
+        if (this.device.logInfo) {
+            this.device.emit('info',
+                `Predict: indoor=${currentTemp?.toFixed(1) || '?'}°C, outdoor=${outdoorTemp?.toFixed(1) || '?'}°C, ` +
+                `target=${userComfortTarget}°C → room target=${setpointResult.predictedRoomTarget}°C (${setpointResult.reason})`
+            );
+        }
 
         // Process through state machine
         const stateResult = this.stateMachine.processUpdate({
             currentTemp,
-            targetTemp: userTarget,
-            predictedSetpoint: setpointResult.setpoint,
-            seasonMode: this.getSeasonMode(),
+            targetTemp: userComfortTarget,
+            predictedSetpoint: setpointResult.predictedRoomTarget,
+            seasonMode,
             forecast: this.weatherClient.getForecast(),
             acPowerState
         });
+
+        // Log action if one will be taken
+        if (stateResult.action && this.device.logDebug) {
+            this.device.emit('debug',
+                `PredictiveController: Action=${stateResult.action.type}, state=${stateResult.state}, reason=${stateResult.reason}`
+            );
+        }
 
         // Emit prediction data for logging
         this.emit('prediction', {
             timestamp: new Date(),
             currentTemp,
-            userTarget,
-            predictedSetpoint: setpointResult.setpoint,
+            userComfortTarget,
+            predictedSetpoint: setpointResult.predictedRoomTarget,
             setpointComponents: setpointResult.components,
             state: stateResult.state,
-            seasonMode: this.getSeasonMode(),
-            outdoorTemp: this.weatherClient.getCurrentOutdoorTemp(),
+            seasonMode,
+            outdoorTemp,
             solarRadiation: this.weatherClient.getCurrentSolarRadiation()
         });
 
