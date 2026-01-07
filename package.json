@@ -1,7 +1,7 @@
 {
   "displayName": "MELCloud Passive House",
   "name": "homebridge-melcloud-passive-house",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "Homebridge plugin for passive house climate control using Mitsubishi AC via MELCloud. Features predictive temperature management, external sensors (Shelly), weather forecasting, and thermal learning.",
   "license": "MIT",
   "author": "mslavov",

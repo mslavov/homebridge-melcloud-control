@@ -64,7 +64,7 @@ class MelCloud extends EventEmitter {
             }
 
             const buildingsList = listDevicesData.data;
-            if (this.logDebug) this.emit('debug', `Buildings: ${JSON.stringify(buildingsList, null, 2)}`);
+            if (this.logDebug) this.emit('debug', `Buildings: ${JSON.stringify(buildingsList)}`);
 
             if (!Array.isArray(buildingsList) || buildingsList.length === 0) {
                 devicesList.Info = 'No building found'
@@ -153,7 +153,7 @@ class MelCloud extends EventEmitter {
                 MapLongitude: 'removed',
                 MapLatitude: 'removed'
             };
-            if (this.logDebug) this.emit('debug', `MELCloud Info: ${JSON.stringify(safeConfig, null, 2)}`);
+            if (this.logDebug) this.emit('debug', `MELCloud Info: ${JSON.stringify(safeConfig)}`);
 
             if (!contextKey) {
                 accountInfo.Info = 'Context key missing'

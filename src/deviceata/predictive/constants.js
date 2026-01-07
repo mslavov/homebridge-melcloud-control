@@ -23,7 +23,7 @@ export const SeasonMode = {
 // Anti-oscillation parameters
 export const AntiOscillation = {
     DEADBAND: 4.0,              // °C total deadband width
-    HYSTERESIS: 2.0,            // °C before switching modes
+    HYSTERESIS: 1.0,            // °C before switching modes (reduced for passive house with slow thermal response)
     MIN_ON_TIME: 5 * 60,        // 5 minutes minimum runtime once activated (seconds)
     MIN_OFF_TIME: 3 * 60,       // 3 minutes minimum off before restart (seconds)
     MIN_MODE_SWITCH: 10 * 60,   // 10 minutes between heat↔cool transitions (seconds)

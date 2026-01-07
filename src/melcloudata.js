@@ -37,7 +37,7 @@ class MelCloudAta extends EventEmitter {
                 deviceData.Scenes = devicesData.Scenes ?? [];
 
                 //update state
-                if (this.logDebug) this.emit('debug', `Request update settings: ${JSON.stringify(deviceData.Device, null, 2)}`);
+                if (this.logDebug) this.emit('debug', `Request update settings: ${JSON.stringify(deviceData.Device)}`);
                 await this.updateState('request', deviceData);
             } catch (error) {
                 if (this.logError) this.emit('error', `Request process message error: ${error}`);
@@ -153,7 +153,7 @@ class MelCloudAta extends EventEmitter {
                 deviceData.Device.DefaultCoolingSetTemperature = temps?.defaultCoolingSetTemperature ?? 24;
 
             }
-            if (this.logDebug) this.emit('debug', `Device Data: ${JSON.stringify(deviceData, null, 2)}`);
+            if (this.logDebug) this.emit('debug', `Device Data: ${JSON.stringify(deviceData)}`);
 
             //device
             const serialNumber = deviceData.SerialNumber || '4.0.0';
@@ -263,7 +263,7 @@ class MelCloudAta extends EventEmitter {
                             break;
                     }
 
-                    if (this.logDebug) this.emit('debug', `Send data: ${JSON.stringify(payload, null, 2)}`);
+                    if (this.logDebug) this.emit('debug', `Send data: ${JSON.stringify(payload)}`);
                     await this.client(path, { method: 'POST', data: payload });
 
                     if (update) {
@@ -345,7 +345,7 @@ class MelCloudAta extends EventEmitter {
                     }
 
                     //send payload
-                    if (this.logDebug) this.emit('debug', `Send data: ${JSON.stringify(payload, null, 2)}`);
+                    if (this.logDebug) this.emit('debug', `Send data: ${JSON.stringify(payload)}`);
                     await this.client(path, { method: method, data: payload });
 
                     if (update) {

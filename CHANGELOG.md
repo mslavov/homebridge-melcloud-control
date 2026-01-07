@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - (07.01.2026)
+
+### Added
+
+- **Cold Weather Boost (Layer 5)**: New setpoint calculation layer for ducted AC with post-recuperator sensor
+  - Outdoor < 5°C: +1°C boost to setpoint
+  - Outdoor < 0°C: +2°C boost to setpoint
+  - Outdoor < -5°C: +3°C boost to setpoint
+  - Forecast-based boost when extreme cold is coming
+  - Per installer instructions: ensures 6-8°C delta for adequate heating power
+- **Expanded Safety Bounds**: In very cold weather (outdoor < 0°C), allows up to +4°C above user target (was ±2°C)
+
+### Changed
+
+- **Reduced HYSTERESIS**: From 2.0°C to 1.0°C for passive houses with slow thermal response
+  - Heating now activates when room is 1°C below target (was 2°C)
+- **Compact Debug Logs**: JSON output now single-line instead of formatted (reduces log file size significantly)
+
+### Fixed
+
+- Removed unused `targetTemp` parameter from `_calculateOutdoorResetCurve()` method
+
 ## [1.2.0] - (04.01.2026)
 
 ### Added

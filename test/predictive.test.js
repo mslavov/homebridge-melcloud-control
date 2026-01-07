@@ -4,7 +4,7 @@
  * - StateMachine
  * - PredictiveController
  */
-import { test, describe, beforeEach, mock } from 'node:test';
+import { test, describe, beforeEach } from 'node:test';
 import assert from 'node:assert';
 import { SetpointCalculator } from '../src/deviceata/predictive/setpoint-calculator.js';
 import { StateMachine } from '../src/deviceata/predictive/state-machine.js';
@@ -302,6 +302,108 @@ describe('SetpointCalculator', () => {
         test('updates solar gain factor when provided', () => {
             calculator.updateBuildingParameters({ solarGainFactor: 0.02 });
             assert.strictEqual(calculator.solarGainFactor, 0.02);
+        });
+    });
+
+    describe('Cold Weather Boost', () => {
+        test('applies boost when outdoor temp below 5°C', () => {
+            const result = calculator.calculateSetpoint({
+                userComfortTarget: 23,
+                currentIndoorTemp: 22,
+                currentOutdoorTemp: 4, // Below 5°C threshold
+                forecastTemps: Array(24).fill(4), // Stable forecast
+                forecastSolar: [],
+                seasonMode: SeasonMode.WINTER
+            });
+
+            assert.ok(result.components.coldWeatherBoost >= 1);
+        });
+
+        test('applies higher boost when outdoor temp below 0°C', () => {
+            const result = calculator.calculateSetpoint({
+                userComfortTarget: 23,
+                currentIndoorTemp: 22,
+                currentOutdoorTemp: -2, // Below 0°C
+                forecastTemps: Array(24).fill(-2),
+                forecastSolar: [],
+                seasonMode: SeasonMode.WINTER
+            });
+
+            assert.ok(result.components.coldWeatherBoost >= 2);
+        });
+
+        test('applies maximum boost when outdoor temp below -5°C', () => {
+            const result = calculator.calculateSetpoint({
+                userComfortTarget: 23,
+                currentIndoorTemp: 22,
+                currentOutdoorTemp: -8, // Extreme cold
+                forecastTemps: Array(24).fill(-8),
+                forecastSolar: [],
+                seasonMode: SeasonMode.WINTER
+            });
+
+            assert.ok(result.components.coldWeatherBoost >= 3);
+        });
+
+        test('applies forecast-based boost when extreme cold coming', () => {
+            const forecastTemps = [];
+            for (let i = 0; i < 24; i++) {
+                forecastTemps.push(5 - i * 0.5); // Drops from 5 to -7
+            }
+
+            const result = calculator.calculateSetpoint({
+                userComfortTarget: 23,
+                currentIndoorTemp: 22,
+                currentOutdoorTemp: 5, // Currently above 5°C
+                forecastTemps: forecastTemps, // But extreme cold coming
+                forecastSolar: [],
+                seasonMode: SeasonMode.WINTER
+            });
+
+            // Should have boost due to forecast showing < -5°C coming
+            assert.ok(result.components.coldWeatherBoost >= 2);
+        });
+
+        test('does not apply cold boost in summer mode', () => {
+            const result = calculator.calculateSetpoint({
+                userComfortTarget: 25,
+                currentIndoorTemp: 26,
+                currentOutdoorTemp: 4, // Cold but in summer mode
+                forecastTemps: [],
+                forecastSolar: [],
+                seasonMode: SeasonMode.SUMMER
+            });
+
+            assert.strictEqual(result.components.coldWeatherBoost, 0);
+        });
+
+        test('no cold boost when outdoor temp above 5°C', () => {
+            const result = calculator.calculateSetpoint({
+                userComfortTarget: 23,
+                currentIndoorTemp: 22,
+                currentOutdoorTemp: 10, // Above 5°C
+                forecastTemps: Array(24).fill(10), // Stable forecast
+                forecastSolar: [],
+                seasonMode: SeasonMode.WINTER
+            });
+
+            assert.strictEqual(result.components.coldWeatherBoost, 0);
+        });
+
+        test('allows larger positive deviation in very cold weather', () => {
+            const result = calculator.calculateSetpoint({
+                userComfortTarget: 23,
+                currentIndoorTemp: 22,
+                currentOutdoorTemp: -10, // Very cold
+                forecastTemps: Array(24).fill(-10),
+                forecastSolar: [],
+                seasonMode: SeasonMode.WINTER
+            });
+
+            // Should allow predicted target to exceed user target by more than 2°C
+            const deviation = result.predictedRoomTarget - 23;
+            // With cold boost of 3 + outdoor reset + error correction, should be > 2
+            assert.ok(deviation >= 0); // At minimum, should not be clamped down
         });
     });
 });

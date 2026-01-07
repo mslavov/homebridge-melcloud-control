@@ -8,6 +8,7 @@ import { PredictiveDefaults, SeasonMode } from './constants.js';
  * 2. Forecast look-ahead - weight future temps by exponential decay
  * 3. Solar gain compensation - reduce heating when sun expected
  * 4. Error correction - small proportional term for current deviation
+ * 5. Cold weather boost - increase setpoint for ducted AC with post-recuperator sensor
  */
 class SetpointCalculator {
     constructor(device) {
@@ -64,7 +65,8 @@ class SetpointCalculator {
             outdoorReset: 0,
             forecastAdjustment: 0,
             solarOffset: 0,
-            errorCorrection: 0
+            errorCorrection: 0,
+            coldWeatherBoost: 0
         };
         const reasons = [];
 
@@ -72,7 +74,6 @@ class SetpointCalculator {
         // For high-mass systems, use lower slope (0.3-0.5)
         if (currentOutdoorTemp !== null) {
             const outdoorReset = this._calculateOutdoorResetCurve(
-                userComfortTarget,
                 currentOutdoorTemp,
                 seasonMode
             );
@@ -120,15 +121,37 @@ class SetpointCalculator {
             predictedRoomTarget += errorCorrection;
         }
 
+        // Layer 5: Cold weather boost (for ducted AC with post-recuperator sensor)
+        // Per installer instructions: in very cold weather, increase delta to 6-8°C
+        if (seasonMode === SeasonMode.WINTER && currentOutdoorTemp !== null) {
+            const coldBoost = this._calculateColdWeatherBoost(currentOutdoorTemp, forecastTemps);
+            components.coldWeatherBoost = coldBoost;
+            predictedRoomTarget += coldBoost;
+
+            if (coldBoost > 0) {
+                reasons.push(`Cold boost: +${coldBoost.toFixed(1)}°C`);
+            }
+        }
+
         // Apply season-specific floors to prevent over-aggressive adjustments
-        // In winter, never set more than 2°C below user comfort target
+        // In winter, allow larger positive deviation in cold weather for heating boost
         // In summer, never set more than 2°C above user comfort target
-        const maxDeviation = 2.0;
-        if (seasonMode === SeasonMode.WINTER && predictedRoomTarget < userComfortTarget - maxDeviation) {
-            predictedRoomTarget = userComfortTarget - maxDeviation;
+        let maxPositiveDeviation = 2.0;
+        const maxNegativeDeviation = 2.0;
+
+        // In very cold weather, allow up to +4°C above target for adequate heating delta
+        if (seasonMode === SeasonMode.WINTER && currentOutdoorTemp !== null && currentOutdoorTemp < 0) {
+            maxPositiveDeviation = 4.0;
+        }
+
+        if (seasonMode === SeasonMode.WINTER && predictedRoomTarget < userComfortTarget - maxNegativeDeviation) {
+            predictedRoomTarget = userComfortTarget - maxNegativeDeviation;
             reasons.push('Clamped to min heating target');
-        } else if (seasonMode === SeasonMode.SUMMER && predictedRoomTarget > userComfortTarget + maxDeviation) {
-            predictedRoomTarget = userComfortTarget + maxDeviation;
+        } else if (seasonMode === SeasonMode.WINTER && predictedRoomTarget > userComfortTarget + maxPositiveDeviation) {
+            predictedRoomTarget = userComfortTarget + maxPositiveDeviation;
+            reasons.push('Clamped to max heating target');
+        } else if (seasonMode === SeasonMode.SUMMER && predictedRoomTarget > userComfortTarget + maxPositiveDeviation) {
+            predictedRoomTarget = userComfortTarget + maxPositiveDeviation;
             reasons.push('Clamped to max cooling target');
         }
 
@@ -152,7 +175,7 @@ class SetpointCalculator {
      * As outdoor temp drops, increase heating setpoint
      * As outdoor temp rises, decrease cooling setpoint
      */
-    _calculateOutdoorResetCurve(targetTemp, outdoorTemp, seasonMode) {
+    _calculateOutdoorResetCurve(outdoorTemp, seasonMode) {
         // Design outdoor temp assumption (where no adjustment needed)
         const designOutdoorTemp = seasonMode === SeasonMode.WINTER ? 10 : 25;
 
@@ -237,6 +260,44 @@ class SetpointCalculator {
 
         // Limit correction to prevent overcorrection
         return Math.max(-1, Math.min(1, correction));
+    }
+
+    /**
+     * Calculate cold weather boost for ducted AC with post-recuperator sensor
+     *
+     * Per installer instructions (docs/installer-instructions.md):
+     * - Below 5°C: delta 3-5°C above AC sensor
+     * - Very cold: delta 6-8°C above AC sensor
+     *
+     * The AC sensor reads post-recuperator air (17-20°C), not room temp.
+     * We need to boost setpoint to ensure adequate heating delta.
+     */
+    _calculateColdWeatherBoost(outdoorTemp, forecastTemps) {
+        let boost = 0;
+
+        // Current outdoor temperature determines base boost
+        if (outdoorTemp < -5) {
+            boost = 3; // Extreme cold: need maximum heating power
+        } else if (outdoorTemp < 0) {
+            boost = 2; // Very cold: high heating power
+        } else if (outdoorTemp < 5) {
+            boost = 1; // Cold: moderate heating boost
+        }
+
+        // Additional boost if extreme cold is forecast in next 24 hours
+        // This enables pre-heating before the cold arrives
+        if (forecastTemps && forecastTemps.length > 0) {
+            const minForecast = Math.min(...forecastTemps.slice(0, 24));
+            if (minForecast < -5 && boost < 3) {
+                // Extreme cold coming - boost to at least 2
+                boost = Math.max(boost, 2);
+            } else if (minForecast < 0 && boost < 2) {
+                // Very cold coming - boost to at least 1
+                boost = Math.max(boost, 1);
+            }
+        }
+
+        return boost;
     }
 
     /**
